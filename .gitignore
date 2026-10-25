@@ -1,0 +1,17 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Temporary and test artifacts
+test.html
+test.pdf
+.ipynb_checkpoints/
+*.tmp
+
+# Operating system files
+Thumbs.db
+ehthumbs.db
+[Dd]esktop.ini
+$RECYCLE.BIN/
+.DS_Store
