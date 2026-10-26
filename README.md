@@ -18,11 +18,11 @@ cirah_project/
 │   ├── optimizer.py           # Risk-Constrained Combinatorial Action Selection & Safe Fallback Engine
 │   ├── fault_generator.py     # Multi-fault injection: concurrent cuts (k=1..4), brownouts, jitter, telemetry noise
 │   ├── baselines.py           # 5 Baselines: Static-SP, Dynamic-SP, Backup-Path, Risk-Aware, MinChange-SP
-│   ├── controller_sim.py      # Master CIRAH closed-loop controller & 3 Ablation variants
+│   ├── controller_sim.py      # Master CIRAH closed-loop controller & 6 Ablation variants
 │   └── evaluator.py           # Standardized, unbiased evaluation harness across all methods
 ├── experiments/
 │   ├── test_components.py     # Unit test suite verifying all pipeline components
-│   ├── run_experiments.py    # 4 major experimental campaigns across 4,500+ paired Monte Carlo runs
+│   ├── run_experiments.py    # 6 experimental campaigns across ~4,920 paired Monte Carlo runs
 │   ├── statistical_analysis.py# Inferential paired Wilcoxon & t-tests, 95% CIs, Cohen's d effect sizes
 │   └── generate_plots.py      # High-resolution (300 DPI) publication-grade figures
 ├── results/
@@ -30,6 +30,8 @@ cirah_project/
 │   ├── exp2_stress_sweep.csv     # Raw runs for link capacity & degradation sweep (rho=0.1..0.9)
 │   ├── exp3_telemetry_noise.csv  # Telemetry uncertainty sweep (sigma=0.0..0.30)
 │   ├── exp4_gamma_sensitivity.csv# Hyperparameter sweep for healing weight gamma
+│   ├── exp4_rebuilt_ablations.csv# 6-way component ablation study (N=60 paired runs)
+│   ├── exp5_counterfactual_validation.csv # Non-circular physical queue simulator validation
 │   ├── summary_failure_severity.csv # Aggregated means and standard deviations
 │   └── hypothesis_tests_cirah_vs_dynamic.csv # Statistical significance and p-values
 ├── figures/
@@ -55,7 +57,7 @@ python experiments/test_components.py
 python experiments/test_audited_defects.py
 ```
 
-### 2. Execute Full Experimental Campaigns (4,500+ paired runs)
+### 2. Execute Full Experimental Campaigns (~4,920 paired runs)
 ```powershell
 python experiments/run_experiments.py
 ```
