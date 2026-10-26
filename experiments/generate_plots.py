@@ -224,51 +224,48 @@ def plot_fig8_residual_risk():
     print(f"Saved {out_file}")
 
 def plot_fig9_ablation_radar():
-    """Figure 9: Component-Level Ablation Bar Chart (CIRAH vs noCausal vs noRisk vs noInterv)."""
-    csv_path = os.path.join(RESULTS_DIR, "exp1_failure_severity.csv")
+    """Figure 9: Rebuilt 6-Way Component Ablation Bar Chart (Faculty Correction 2)."""
+    csv_path = os.path.join(RESULTS_DIR, "exp4_rebuilt_ablations.csv")
     if not os.path.exists(csv_path):
         return
     df = pd.read_csv(csv_path)
-    df_k2 = df[(df["topology"] == "abilene") & (df["k_failures"] == 2)]
 
-    ablation_methods = ["CIRAH", "CIRAH-noCausal", "CIRAH-noRisk", "CIRAH-noInterv"]
+    ablation_methods = ["CIRAH-full", "CIRAH-noCausal", "CIRAH-noCF", "CIRAH-noCIHF", "CIRAH-noRisk", "CIRAH-noInterv"]
     metrics = ["success", "risk_post", "switches_modified", "intervention_cost"]
     
-    agg = df_k2[df_k2["method"].isin(ablation_methods)].groupby("method")[metrics].mean().loc[ablation_methods]
+    agg = df.groupby("variant")[metrics].mean().reindex(ablation_methods)
 
-    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(10, 7.5))
+    fig, ((ax1, ax2), (ax3, ax4)) = plt.subplots(2, 2, figsize=(11, 8))
     
+    bar_colors = ["#1b9e77", "#d95f02", "#e6ab02", "#66a61e", "#7570b3", "#e7298a"]
+    labels = ["Full", "noCausal", "noCF", "noCIHF", "noRisk", "noInterv"]
+
     # 1. Success rate
-    ax1.bar(agg.index, agg["success"] * 100.0, color=[PALETTE[m] for m in agg.index], edgecolor="black")
-    ax1.set_ylabel("Success Rate (%)")
+    ax1.bar(labels, agg["success"] * 100.0, color=bar_colors, edgecolor="black")
+    ax1.set_ylabel("Recovery Success Rate (%)")
     ax1.set_title("(a) Recovery Success Rate")
     ax1.set_ylim(0, 105)
     ax1.grid(True, axis="y")
 
     # 2. Risk post
-    ax2.bar(agg.index, agg["risk_post"], color=[PALETTE[m] for m in agg.index], edgecolor="black")
-    ax2.set_ylabel("Residual Risk")
-    ax2.axhline(35.0, color="red", linestyle="--", label="$R_{\\max}$ bound")
-    ax2.set_title("(b) Post-Intervention Risk")
+    ax2.bar(labels, agg["risk_post"], color=bar_colors, edgecolor="black")
+    ax2.set_ylabel("Residual Post Risk ($R_{\\text{post}}$)")
+    ax2.set_title("(b) Post-Intervention Residual Risk")
     ax2.grid(True, axis="y")
-    ax2.legend()
 
     # 3. Switches modified
-    ax3.bar(agg.index, agg["switches_modified"], color=[PALETTE[m] for m in agg.index], edgecolor="black")
-    ax3.set_ylabel("Switches Modified")
-    ax3.set_title("(c) Switch Churn")
+    ax3.bar(labels, agg["switches_modified"], color=bar_colors, edgecolor="black")
+    ax3.set_ylabel("Switches Modified (Churn)")
+    ax3.set_title("(c) Control-Plane Switch Churn")
     ax3.grid(True, axis="y")
 
     # 4. Intervention cost
-    ax4.bar(agg.index, agg["intervention_cost"], color=[PALETTE[m] for m in agg.index], edgecolor="black")
+    ax4.bar(labels, agg["intervention_cost"], color=bar_colors, edgecolor="black")
     ax4.set_ylabel("Intervention Cost $C_I(a)$")
-    ax4.set_title("(d) Control Plane Cost")
+    ax4.set_title("(d) Control Plane Reconfiguration Cost")
     ax4.grid(True, axis="y")
 
-    for ax in [ax1, ax2, ax3, ax4]:
-        ax.set_xticklabels(["Full", "noCausal", "noRisk", "noInterv"], rotation=0)
-
-    plt.suptitle("Component-Level Ablation Analysis under Multi-Link Failure ($k=2$)", fontsize=13)
+    plt.suptitle("Component-Level 6-Way Ablation Analysis (N=60 Paired Scenarios)", fontsize=13)
     plt.tight_layout()
     out_file = os.path.join(FIG_DIR, "fig9_component_ablations.png")
     plt.savefig(out_file, dpi=300)

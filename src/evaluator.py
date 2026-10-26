@@ -81,7 +81,7 @@ class StandardizedEvaluator:
             "loss_pct": loss,
             "risk_post": float(risk_res["R_post"]),
             "is_risk_feasible": bool(risk_res["is_risk_feasible"]),
-            "constraint_violation": not risk_res["is_risk_feasible"],
+            "constraint_violation": bool(risk_res["R_post"] > self.risk_module.r_max),
             "flow_mods": cost_res["flow_mods"],
             "switches_modified": cost_res["switches_modified"],
             "links_changed": cost_res["links_changed"],
