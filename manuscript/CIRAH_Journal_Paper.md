@@ -1,7 +1,7 @@
 # CIRAH: Minimum-Causal-Intervention Optimization for Risk-Constrained Autonomous Network Self-Healing
 
-**Buradagunta Shabreen Shaik, Rajisree Sadu, Pemmasani Greeshma**  
-*School of Computer Science and Engineering, VIT-AP University, Amaravati, Andhra Pradesh, 522237, India*  
+**Buradagunta Shabreen Shaik, Rajisree Sadu, Pemmasani Greeshma**
+*School of Computer Science and Engineering, VIT-AP University, Amaravati, Andhra Pradesh, 522237, India*
 
 ---
 
@@ -119,7 +119,7 @@ We define the network state using a 6-tuple SCM: $\mathcal{M} = \langle \mathcal
   * $A$: Candidate intervention operator $do(A=a)$.
 
 The structural equations governing link state and queuing dynamics are:
-$$L_e = f_L(F_e, U_{L, e}) = \begin{cases} 
+$$L_e = f_L(F_e, U_{L, e}) = \begin{cases}
 \langle \text{lat}_0, 0, \text{cap}_0 \rangle + U_{L, e}, & \text{if } F_e = 0 \\
 \langle \text{lat}_0 \cdot (1 + \delta), \text{loss}_{\text{deg}}, \text{cap}_0 \cdot \rho \rangle + U_{L, e}, & \text{if } F_e = 1 \\
 \langle \infty, 100\%, 0 \rangle, & \text{if } F_e = 2
@@ -257,10 +257,11 @@ The algorithmic complexity per failure event decomposes into:
 * CIHF diffusion: $\mathcal{O}(|\mathcal{V}|^2)$ using precomputed inverted kernel $(\mathbf{I} + \sigma \mathbf{L}_{\text{norm}})^{-1}$.
 * Overall runtime complexity per failure event: $\mathcal{O}(K \cdot |\mathcal{V}| \log |\mathcal{V}| + |\mathcal{A}| \cdot (|\mathcal{E}| + |\mathcal{V}|^2))$.
 
-Across 100 independent benchmark runs on commodity hardware (Intel Core i5-8600K, 16 GB RAM), measured decision latencies were:
+Across 100 independent benchmark profiling runs on commodity hardware (Intel Core i5-8600K, 16 GB RAM), measured **controller algorithmic execution latency** (measuring isolated CPU computation for SCM inference, counterfactual evaluation, CIHF diffusion, and optimizer path selection per single failure cycle, excluding control-plane OpenFlow rule installation and data-plane propagation) was:
 * **Abilene (11 nodes):** Mean = $6.28\text{ ms}$, Median ($p_{50}$) = $5.92\text{ ms}$, 95th-percentile ($p_{95}$) = $8.70\text{ ms}$, Worst-case = $9.15\text{ ms}$.
 * **GEANT (22 nodes):** Mean = $10.78\text{ ms}$, Median ($p_{50}$) = $10.93\text{ ms}$, 95th-percentile ($p_{95}$) = $14.33\text{ ms}$, Worst-case = $15.70\text{ ms}$.
-This demonstrates sub-16 ms decision times suitable for online SDN control planes.
+
+This profiling demonstrates that isolated algorithmic decision execution completes in under $16\text{ ms}$ per decision cycle. However, this algorithmic computation time must be clearly distinguished from total **end-to-end recovery time**, which encompasses multi-failure candidate path search, flow-table reconfiguration message exchanges, and switch commit latency ($\Delta t_{\text{commit}} = 12\text{ ms}$ per switch), yielding higher overall recovery times under multi-link cuts (as evaluated in Section 5.1).
 
 ---
 
@@ -336,8 +337,8 @@ Under double-link failure conditions ($k=2$) on the Abilene topology:
 * The mean intervention cost decreases from $19.02$ to $17.25$, a **$9.3\%$ reduction** ($p = 0.00089$, paired Cohen's $d_z = -0.55$).
 * Both CIRAH and Dynamic-SP achieve an identical recovery success rate of $72.0\%$.
 * Under single-link failures ($k=1$), CIRAH reduces switch churn from $2.84$ to $2.28$ switches, a **$19.7\%$ reduction** ($p = 0.00206$, paired Cohen's $d_z = -0.47$), while intervention cost drops by **$14.2\%$** ($14.34 \to 12.30$, $p = 0.00209$).
-* CIRAH accepts a modest latency trade-off ($52.4\text{ ms}$ vs. $48.6\text{ ms}$) in exchange for avoiding rewriting forwarding rules on intermediate switches.
-* **Recovery Time Trade-off:** CIRAH's SCM-based diagnostic processing introduces measurable decision overhead. At $k=2$, CIRAH's mean recovery time is $178.9 \pm 65.8\text{ ms}$ compared to Dynamic-SP's $60.5 \pm 3.0\text{ ms}$. This overhead is attributable to the Bayesian fault-traceback computation and counterfactual candidate evaluation. The $178.9\text{ ms}$ figure remains within the sub-200 ms recovery envelope acceptable for carrier-grade SDN deployments (per ITU-T G.8032), and the variance ($\pm 65.8\text{ ms}$) reflects scenario-level path-search depth. Future hardware acceleration of the SCM solver is identified as a priority optimization target.
+* Under single-link failures ($k=1$), CIRAH's mean recovery time is $49.442424\text{ ms}$ compared to $49.184214\text{ ms}$ for Dynamic-SP, demonstrating comparable single-failure recovery speed while avoiding rewriting forwarding rules on intermediate switches.
+* **Recovery Time Trade-off:** CIRAH's SCM-based diagnostic processing and combinatorial path search introduce measurable decision overhead that scales with failure severity. At single failure ($k=1$), CIRAH achieves recovery times comparable to Dynamic-SP ($49.4 \pm 2.9\text{ ms}$ vs. $49.2 \pm 3.9\text{ ms}$). At double failures ($k=2$), recovery time increases to $178.9 \pm 65.8\text{ ms}$ (vs. $60.5 \pm 3.0\text{ ms}$). Under triple failures ($k=3$), CIRAH's mean recovery time reaches $415.0 \pm 106.1\text{ ms}$ compared with $58.8 \pm 4.2\text{ ms}$ for Dynamic-SP. This latency reflects the computational cost of evaluating $K$-shortest candidate paths through counterfactual $do(A)$-calculus and solving the risk-constrained objective. Consequently, CIRAH cannot be characterized as universally faster or strictly sub-200 ms across all failure conditions; rather, it trades computational decision latency for substantial reductions in switch modification churn and control-plane intervention overhead.
 
 ### 5.3 Telemetry Noise Robustness (RQ3)
 Table 3 evaluates recovery performance under increasing telemetry measurement noise $\sigma_{\text{noise}} \in [0.0, 0.30]$.
@@ -376,14 +377,15 @@ Table 4 empirically establishes the independent contributions of CIRAH's core mo
 2. **Intervention Cost Penalty (`CIRAH-noInterv`):** Setting $\lambda_I = 0$ removes the penalty on switch churn, leading to an increase in switch modifications from $3.60$ to $3.78$ and elevating intervention cost to $19.53$. Without churn awareness, the controller indiscriminately triggers OpenFlow rule modifications for marginal delay improvements.
 3. **Causal Traceback (`CIRAH-noCausal`):** Relying on correlation-based heuristics rather than Bayesian multi-path traceback increases post-repair risk from $7.06$ to $8.29$ and introduces constraint violations ($1.7\%$) due to false-positive fault localization under cross-traffic noise.
 4. **Healing Field (`CIRAH-noCIHF`):** Eliminating the graph Laplacian diffusion field ($\gamma = 0$) causes the spectral healing gain to collapse to $\Psi = 0.000$, depriving the optimizer of spatial stress relief insights across adjacent clusters.
-5. **Counterfactual Evaluation (`CIRAH-noCF`):** Evaluating candidate paths using observational metrics rather than counterfactual $do(A)$ calculus yields nearly identical path selection on the Abilene topology under nominal link margins ($7.04$ vs. $7.06$ residual risk; identical $3.60$ switches modified). As established in Section 5.5, counterfactual modeling primarily provides accurate downstream queue prediction under impending saturation ($\rho = 0.967$), while the primary topological steering under moderate load is governed by the risk constraint and intervention penalty.
+5. **Counterfactual Evaluation (`CIRAH-noCF`):** Evaluating candidate paths using observational metrics rather than counterfactual $do(A)$ calculus yields nearly identical path selection on the Abilene topology under nominal link margins ($7.04$ vs. $7.06$ residual risk; identical $3.60$ switches modified). As established in Section 5.5, both counterfactual and myopic estimators achieve comparable high action-ranking concordance against the independent data plane ($\rho = 0.967 \pm 0.021$ vs. $\rho = 0.968 \pm 0.065$), while primary topological steering under moderate load is governed by the risk constraint and intervention penalty.
 
 ### 5.5 Counterfactual Prediction Accuracy & Independent Physical Validation
 To prevent circular evaluation (Audit Phase 3), Campaign 5 evaluates counterfactual predictions against an **independent stochastic finite-buffer data-plane simulator** (`simulate_independent_dataplane`) that simulates physical queue dynamics, traffic burstiness, and buffer overflow tail drops across $N=60$ trials:
-* **Latency MAE:** $1.23 \pm 0.61\text{ ms}$ (compared to $1.11\text{ ms}$ for the myopic baseline).
+* **Latency MAE:** $1.23 \pm 0.61\text{ ms}$ for CIRAH (compared to $1.11 \pm 0.54\text{ ms}$ for the myopic baseline).
 * **Packet Loss MAE:** $0.37 \pm 0.18\%$.
-* **Spearman Action Ranking Correlation:** $\rho = 0.967 \pm 0.021$.
-This confirms that Pearl's counterfactual $do(A)$ interventional model achieves near-perfect action rank concordance ($\rho > 0.96$) against realistic data-plane physical queue dynamics without circular dependency.
+* **Spearman Action Ranking Correlation:** CIRAH achieves $\rho = 0.967 \pm 0.021$, compared to $\rho = 0.968 \pm 0.065$ for the myopic baseline ($N=60$ valid paired trials).
+
+These results confirm that both Pearl's counterfactual $do(A)$ interventional model ($\rho = 0.967 \pm 0.021$) and the myopic baseline ($\rho = 0.968 \pm 0.065$) achieve high rank concordance ($\rho \approx 0.97$) with ground-truth data-plane action rankings. The difference in ranking correlation between the two methods is within statistical error, with CIRAH displaying narrower ranking variance ($\pm 0.021$ vs. $\pm 0.065$). These results do not show that CIRAH outperforms the myopic baseline in ranking accuracy under the evaluated conditions. Rather, they confirm that both candidate evaluation methods reliably reflect candidate action ordering against an independently simulated physical data plane without circular dependency, yielding low prediction errors (latency MAE $1.23 \pm 0.61\text{ ms}$, packet loss MAE $0.37 \pm 0.18\%$) consistent with physical queue dynamics.
 
 ---
 
@@ -393,18 +395,20 @@ Table 5 summarizes the paired statistical hypothesis tests comparing CIRAH again
 
 **Table 5: Paired Inferential Hypothesis Tests: CIRAH vs. Dynamic-SP (Abilene Topology, $N=50$)**
 
-| Severity ($k$) | Metric | CIRAH Mean | Dynamic-SP Mean | % Reduction | Mean Difference ($D$) | 95% CI of Difference | Paired Cohen's $d_z$ | Paired Wilcoxon $p$-value | Paired $t$-test $p$-value | Significant ($\alpha = 0.05$)? |
-| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
-| **$k=1$** | Switches Modified | 2.28 | 2.84 | 19.7% | -0.56 | [-0.90, -0.22] | -0.47 | **0.00206** | **0.00171** | **Yes ($p < 0.01$)** |
-| | Intervention Cost | 12.30 | 14.34 | 14.2% | -2.04 | [-3.30, -0.78] | -0.46 | **0.00209** | **0.00205** | **Yes ($p < 0.01$)** |
-| **$k=2$** | Switches Modified | 3.26 | 3.78 | 13.8% | -0.52 | [-0.78, -0.26] | -0.56 | **0.00082** | **0.00023** | **Yes ($p < 0.001$)** |
-| | Intervention Cost | 17.25 | 19.02 | 9.3% | -1.77 | [-2.68, -0.86] | -0.55 | **0.00089** | **0.00029** | **Yes ($p < 0.001$)** |
-| **$k=3$** | Switches Modified | 3.24 | 3.64 | 11.0% | -0.40 | [-0.66, -0.14] | -0.44 | **0.00280** | **0.00311** | **Yes ($p < 0.01$)** |
-| | Intervention Cost | 16.95 | 18.27 | 7.2% | -1.32 | [-2.23, -0.41] | -0.41 | **0.00304** | **0.00512** | **Yes ($p < 0.01$)** |
+| Severity ($k$) | Metric | CIRAH Mean | Dynamic-SP Mean | % Reduction | Mean Diff ($\bar{D}$) | 95% CI of Difference | Paired Cohen's $d_z$ | Raw Wilcoxon $p$ | Primary Abilene Holm $p$ | Sig. Primary ($N=6$, $\alpha=0.05$)? | Omnibus Holm $p$ | Sig. Omnibus ($N=30$, $\alpha=0.05$)? |
+| :---: | :--- | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: | :---: |
+| **$k=1$** | Switches Modified | 2.28 | 2.84 | 19.7% | -0.56 | [-0.90, -0.22] | -0.47 | 0.00206 | 0.0083 | **Yes** | 0.0516 | **No** |
+| | Intervention Cost | 12.30 | 14.34 | 14.2% | -2.04 | [-3.30, -0.78] | -0.46 | 0.00209 | 0.0083 | **Yes** | 0.0516 | **No** |
+| **$k=2$** | Switches Modified | 3.26 | 3.78 | 13.8% | -0.52 | [-0.78, -0.26] | -0.56 | 0.00082 | 0.0049 | **Yes** | 0.0222 | **Yes** |
+| | Intervention Cost | 17.25 | 19.02 | 9.3% | -1.77 | [-2.69, -0.85] | -0.55 | 0.00089 | 0.0049 | **Yes** | 0.0230 | **Yes** |
+| **$k=3$** | Switches Modified | 3.24 | 3.64 | 11.0% | -0.40 | [-0.66, -0.14] | -0.44 | 0.00280 | 0.0083 | **Yes** | 0.0643 | **No** |
+| | Intervention Cost | 16.95 | 18.27 | 7.2% | -1.32 | [-2.23, -0.41] | -0.41 | 0.00304 | 0.0083 | **Yes** | 0.0669 | **No** |
 
 The paired difference $95\%$ confidence interval for switch churn at $k=2$ strictly excludes zero ( $[-0.78, -0.26]$ ), confirming Hypothesis H1 with high statistical confidence.
 
-> **Note on Multiple Comparisons:** Table 5 reports 6 paired tests (3 severity levels × 2 metrics) without Bonferroni or Benjamini–Hochberg correction. The most conservative Bonferroni-adjusted threshold for $\alpha = 0.05$ across 6 tests is $\alpha' = 0.0083$. All six tests satisfy this corrected threshold (smallest $p = 0.00082$), so the significance findings are robust to multiple-comparison correction.
+> **Multiplicity Control & Hypothesis Family Definitions:** To prevent false-positive inflation from multiple comparisons, adjustments are evaluated across two rigorously prespecified families:
+> 1. **Primary Abilene Churn & Intervention Family ($N=6$):** The core hypothesis tests evaluating switch modification churn and intervention cost at $k=1, 2, 3$. All 6 comparisons maintain statistical significance after Holm-Bonferroni step-down adjustment ($p_{\text{adj}} \le 0.0083 < 0.05$) and Bonferroni adjustment ($p_{\text{adj}} \le 0.0183 < 0.05$).
+> 2. **Omnibus Planned Family ($N=30$):** Spanning both topologies (Abilene, GEANT), 3 failure severities ($k=1, 2, 3$), and 5 evaluation metrics (switches modified, intervention cost, recovery time, residual risk, success rate). Within this omnibus family, 6 tests have zero paired difference (success rate), which are preserved as non-informative ($p = \text{NaN}$) and explicitly count against the declared multiplicity family size of 30 rather than deflating it to 24. Under strict omnibus Holm adjustment across all $N=30$ prespecified hypotheses, 5 comparisons achieve statistical significance at $\alpha = 0.05$: switch churn and intervention cost at $k=2$ on Abilene ($p_{\text{adj}} = 0.0222$ and $p_{\text{adj}} = 0.0230$), and recovery-time comparisons on GEANT across all three failure levels ($p_{\text{adj}} = 0.000003, 0.002976, 0.000031$, reflecting Dynamic-SP's faster reactive Dijkstra recovery). Metrics such as risk, single-cut and triple-cut Abilene churn/cost ($p_{\text{adj}} \approx 0.052$--$0.067$), and Abilene recovery times do not achieve omnibus significance at $\alpha = 0.05$, and are explicitly reported as non-significant under the omnibus family.
 
 ---
 
@@ -412,8 +416,8 @@ The paired difference $95\%$ confidence interval for switch churn at $k=2$ stric
 
 1. **Trade-off Between Churn and Path Latency:** CIRAH occasionally accepts a path with $2$ to $3\text{ ms}$ higher propagation latency if that path avoids reconfiguring multiple core switches. In carrier and datacenter environments, this trade-off is highly desirable: saving multiple switch TCAM updates avoids transient packet reordering and flow table lockups.
 2. **Safe Fallbacks Under Network Partitions:** In catastrophic $k=4$ multi-link failures where physical graph partitioning occurs, CIRAH's fallback engine throttles ingress rate by 50% and maintains connectivity on partial paths, whereas unconstrained Dijkstra aborts with unhandled `NoPath` exceptions.
-3. **Recovery Time Overhead:** CIRAH's SCM-based diagnosis introduces a recovery time overhead ($178.9\text{ ms}$ at $k=2$) compared to reactive Dynamic-SP ($60.5\text{ ms}$). This overhead remains within the sub-200 ms window acceptable for carrier-grade SDN (ITU-T G.8032) and represents the operational cost of safer, constraint-respecting intervention selection. For latency-critical applications below 100 ms, hardware-accelerated SCM solvers or pre-computed partial causal posteriors are recommended future optimizations.
-4. **SDN Controller Integration:** CIRAH's lightweight execution ($<16\text{ ms}$) permits direct integration as a northbound application on OpenFlow controllers (e.g., Ryu, ONOS) or P4 runtime controllers.
+3. **Recovery Time Overhead and Scaling:** CIRAH's SCM-based diagnosis and combinatorial candidate evaluation introduce measurable decision latency that increases with failure severity. While recovery time at single cut ($k=1$) is on par with reactive shortest path ($49.4\text{ ms}$ vs. $49.2\text{ ms}$), it increases to $178.9\text{ ms}$ at $k=2$, and reaches $415.0\text{ ms}$ under severe triple cuts ($k=3$), compared with $58.8\text{ ms}$ for Dynamic-SP. This reflects the combinatorial depth required to explore loop-free paths and compute Pearl counterfactual outcomes. CIRAH trades off recovery computation time in favor of substantially reduced network reconfiguration churn and lower risk of secondary congestion. For latency-critical sub-100 ms requirements, hardware-accelerated SCM solvers or pre-computed topological subgraphs represent promising future extensions.
+4. **SDN Controller Integration:** CIRAH's lightweight algorithmic profiling execution latency ($<16\text{ ms}$ worst-case isolated solver runtime) demonstrates that the controller logic itself introduces minimal computational overhead, permitting integration as a northbound application on OpenFlow controllers (e.g., Ryu, ONOS) or P4 runtime controllers. However, as established in Section 5.1 and 5.2, total end-to-end recovery time depends on failure severity, combinatorial search depth, and physical switch rule commit latencies, scaling from $49.4\text{ ms}$ at $k=1$ to $178.9\text{ ms}$ at $k=2$ and $415.0\text{ ms}$ at $k=3$ on Abilene (compared with $49.2\text{ ms}$, $60.5\text{ ms}$, and $58.8\text{ ms}$ for Dynamic-SP). The sub-16 ms profiling measurement characterizes single-cycle algorithmic computation and should not be interpreted as proof that all end-to-end network recovery operations complete within 16 ms.
 
 ---
 
