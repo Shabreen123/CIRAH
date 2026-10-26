@@ -8,6 +8,7 @@ test.html
 test.pdf
 .ipynb_checkpoints/
 *.tmp
+baseline_backup/
 
 # Operating system files
 Thumbs.db

@@ -49,9 +49,10 @@ cirah_project/
 
 ## 🚀 Quickstart & Reproduction Guide
 
-### 1. Run Component Verification Test
+### 1. Run Component Verification & Regression Tests
 ```powershell
-python src/test_components.py
+python experiments/test_components.py
+python experiments/test_audited_defects.py
 ```
 
 ### 2. Execute Full Experimental Campaigns (4,500+ paired runs)
@@ -70,11 +71,16 @@ python experiments/generate_plots.py
 ```
 All generated figures are saved to `figures/` at 300 DPI.
 
+### 5. Compile Publication-Grade Academic HTML/PDF Manuscript
+```powershell
+python manuscript/convert_to_html.py
+```
+
 ---
 
 ## 📊 Summary of Validated Research Contributions
-* **Intervention Churn Reduction:** Reduces switch modifications by **20.1% to 26.8%** ($p = 0.000258$) and OpenFlow intervention cost by **15.5% to 17.0%** ($p = 0.000271$) compared to reactive Dynamic-SP.
-* **Risk Bound Compliance:** Enforces hard risk constraint $R_{\text{post}} \le R_{\max}$ with **0.0% constraint violation**, preventing secondary cascading congestion.
+* **Intervention Churn Reduction:** Reduces switch modifications by **13.8% to 19.7%** ($p < 0.003$, paired Cohen's $d_z = -0.56$) and OpenFlow intervention cost by **9.3% to 14.2%** ($p < 0.003$) compared to reactive Dynamic-SP.
+* **Risk Bound Compliance:** Enforces robust risk constraint $R_{\text{robust}} \le R_{\max}$ with **0.0% constraint violation**, preventing secondary cascading congestion.
 * **Telemetry Noise Resilience:** Outperforms standard routing by **+22.7% relative success rate** under severe measurement noise ($\sigma = 0.30$).
-* **Statistical Conclusiveness:** Replaces previous descriptive ambiguity ($p = 0.0625$) with definitive inferential significance ($p < 0.001$, Cohen's $d = -0.44$).
+* **Statistical Conclusiveness:** Replaces previous descriptive ambiguity with definitive paired inferential significance ($p < 0.001$, paired Wilcoxon and Student's $t$-tests).
 * **Literature Integrity:** Includes **35 verified, authentic citations** with **82.9% from 2022–2026** and active DOIs.

@@ -48,11 +48,19 @@ class StructuralCausalModel:
         for edge in self.G.edges():
             u, v = edge
             telem = telemetry.get(edge, {"loss": 0.0, "latency": self.G[u][v].get("latency", 10.0), "status": 1})
-            obs_loss = max(0.0, telem.get("loss", 0.0) + np.random.normal(0, telemetry_noise_std))
-            obs_lat = max(1.0, telem.get("latency", 10.0))
-            base_lat = self.G[u][v].get("latency", 10.0)
-            lat_ratio = obs_lat / max(1e-3, base_lat)
+            
+            # Explicit measurement noise on both packet loss and latency (Audit Phase 2.1)
+            raw_loss = telem.get("loss", 0.0)
+            raw_lat = telem.get("latency", self.G[u][v].get("latency", 10.0))
+            base_lat = max(1.0, self.G[u][v].get("latency", 10.0))
             status = telem.get("status", 1)
+
+            # Corrupted observations with numerical non-negativity guarantees
+            noise_loss = np.random.normal(0, telemetry_noise_std)
+            noise_lat = np.random.normal(0, telemetry_noise_std * base_lat)
+            obs_loss = float(np.clip(raw_loss + noise_loss, 0.0, 100.0))
+            obs_lat = float(max(1.0, raw_lat + noise_lat))
+            lat_ratio = obs_lat / base_lat
 
             # Likelihood computation: P(O_e | F_e = k)
             if status == 0 or obs_loss >= 95.0:

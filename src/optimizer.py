@@ -134,6 +134,7 @@ class RiskConstrainedOptimizer:
                  target_flow: Dict[str, Any],
                  pre_node_stress: Dict[str, float],
                  is_myopic: bool = False,
+                 is_causal: bool = True,
                  enforce_risk_constraint: bool = True) -> Dict[str, Any]:
         """
         Executes normalized constrained optimization over candidate action set.
@@ -169,10 +170,11 @@ class RiskConstrainedOptimizer:
             )
             psi = healing_propagator.compute_aggregate_healing_gain(h_field)
 
-            # Target flow latency penalty
+            # Target flow latency penalty: normalized path latency + SLA excess penalty
             t_out = cf_res["flow_outcomes"].get(target_flow["flow_id"], {})
             actual_lat = t_out.get("latency", 1e5)
-            c_lat = max(0.0, actual_lat - target_flow["sla_max_latency_ms"])
+            sla_lat = max(1.0, target_flow["sla_max_latency_ms"])
+            norm_c_l = float((actual_lat / sla_lat) + (max(0.0, actual_lat - sla_lat) / self.c_l_ref))
 
             # Robust Risk Bound with Uncertainty Buffer: R_robust = R_post + z_alpha * sigma_R
             sigma_r = 0.08 * risk_res["R_post"] # 8% estimation uncertainty
@@ -181,8 +183,18 @@ class RiskConstrainedOptimizer:
             # Normalized Objective Function J(a)
             norm_c_i = cost_res["C_I"] / self.c_i_ref
             norm_c_d = cost_res["C_D"] / self.c_d_ref
-            norm_c_l = c_lat / self.c_l_ref
-            norm_r = risk_res["R_post"] / self.r_max
+            if not is_causal:
+                # CIRAH-noCausal ablation: lacks SCM Bayesian traceback, evaluating risk purely via naive telemetry loss
+                cand_p = cand.get("path", [])
+                corr_penalty = 0.0
+                if cand_p and len(cand_p) > 1:
+                    for i in range(len(cand_p)-1):
+                        e = (cand_p[i], cand_p[i+1])
+                        t_loss = current_telemetry.get(e, {}).get("loss", 0.0)
+                        corr_penalty += t_loss * 2.5
+                norm_r = (risk_res["R_post"] + corr_penalty) / self.r_max
+            else:
+                norm_r = risk_res["R_post"] / self.r_max
             norm_psi = psi / self.psi_ref
 
             j_score = (self.lambda_I * norm_c_i +
@@ -194,8 +206,8 @@ class RiskConstrainedOptimizer:
             is_connected = t_out.get("connected", False)
             sla_met = t_out.get("sla_met", False)
 
-            # Risk Constraint Check: R_robust <= R_max
-            violates_risk = (risk_res["R_post"] > self.r_max)
+            # Risk Constraint Check: R_robust <= R_max (or R_post <= R_max if unconstrained)
+            violates_risk = bool((r_robust > self.r_max) if enforce_risk_constraint else (risk_res["R_post"] > self.r_max))
 
             cand_record = {
                 "action": cand,

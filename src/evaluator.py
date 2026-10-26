@@ -72,6 +72,10 @@ class StandardizedEvaluator:
             # If static path failed, recovery time is infinite / capped penalty
             recovery_time_ms = 2000.0
 
+        r_post = float(risk_res["R_post"])
+        sigma_r = 0.08 * r_post
+        r_robust = float(r_post + 1.645 * sigma_r)
+        
         return {
             "method": method_name,
             "action_id": action.get("action_id", "act_unknown"),
@@ -79,9 +83,11 @@ class StandardizedEvaluator:
             "connected": connected,
             "latency_ms": lat,
             "loss_pct": loss,
-            "risk_post": float(risk_res["R_post"]),
+            "risk_post": r_post,
+            "risk_robust": r_robust,
             "is_risk_feasible": bool(risk_res["is_risk_feasible"]),
-            "constraint_violation": bool(risk_res["R_post"] > self.risk_module.r_max),
+            "constraint_violation": bool(r_post > self.risk_module.r_max),
+            "robust_violation": bool(r_robust > self.risk_module.r_max),
             "flow_mods": cost_res["flow_mods"],
             "switches_modified": cost_res["switches_modified"],
             "links_changed": cost_res["links_changed"],

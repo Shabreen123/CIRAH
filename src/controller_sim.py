@@ -92,10 +92,11 @@ class CIRAHController:
                 raw_l = t.get("loss", 0.0)
                 st = t.get("status", 1)
                 is_bad = 1.0 if (raw_l > 3.0 or st == 0) else 0.0
+                # Brittle correlation treats any loss spike > 3% as severed/unusable
                 causal_posteriors[e] = {
                     "P_fault": is_bad,
-                    "P_severed": 1.0 if st == 0 else 0.0,
-                    "P_degraded": 1.0 if (raw_l > 3.0 and st == 1) else 0.0,
+                    "P_severed": 1.0 if (st == 0 or raw_l > 3.0) else 0.0,
+                    "P_degraded": 0.0,
                     "P_normal": 1.0 - is_bad
                 }
         else:
@@ -126,6 +127,7 @@ class CIRAHController:
             target_flow=target_flow,
             pre_node_stress=pre_node_stress,
             is_myopic=self.is_myopic,
+            is_causal=(self.mode != "no_causal"),
             enforce_risk_constraint=self.enforce_risk
         )
 
@@ -157,8 +159,9 @@ class CIRAHController:
             "latency_ms": float(target_res.get("latency", 1e4)),
             "loss_pct": float(target_res.get("loss", 100.0)),
             "risk_post": float(risk_info["R_post"]),
+            "risk_robust": float(best_rec.get("R_robust", risk_info["R_post"])),
             "is_risk_feasible": bool(risk_info["is_risk_feasible"]),
-            "constraint_violation": bool(risk_info["R_post"] > self.optimizer.r_max),
+            "constraint_violation": bool(best_rec.get("violates_risk", risk_info["R_post"] > self.optimizer.r_max)),
             "flow_mods": cost_info["flow_mods"],
             "switches_modified": cost_info["switches_modified"],
             "links_changed": cost_info["links_changed"],
