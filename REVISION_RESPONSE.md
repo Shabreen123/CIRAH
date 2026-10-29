@@ -1,0 +1,142 @@
+# Point-by-Point Revision Response
+
+**Manuscript:** CIRAH — Causal Inference for Resilient Autonomous Healing in SDN  
+**Branch:** cirah-final-audit  
+**Date:** 2026-10-26  
+**Reference Recency:** 28/35 = 80.0% (2022–2026) ✓  
+**Uncited References:** 0 ✓
+
+---
+
+## Response to Revision 1
+
+---
+
+### R1.1 — Literature Coverage
+
+**Reviewer Comment:** The literature review is insufficiently broad and does not cover related SDN resilience, causal inference, and autonomous healing work.
+
+**Response:** The bibliography now contains **35 references** organized across four technical categories in Section 2: (1) SDN restoration, fast rerouting, and minimum-change routing; (2) risk-constrained routing and resilience optimization; (3) causal fault localization and counterfactual decision-making; (4) autonomous self-healing, network digital twins, and safe recovery control. Table 1 compares CIRAH against 10 representative prior approaches across 8 technical dimensions. No prior work in the table combines causal SCM diagnosis, Pearl do(A) counterfactual intervention, fine-grained intervention cost, hard risk bounds, Laplacian-diffusion CIHF, and hardware-agnostic path optimization.
+
+---
+
+### R1.2 — Reference Recency
+
+**Reviewer Comment:** A significant proportion of cited works pre-date 2022 and do not reflect the current state of the field.
+
+**Response:** **28 of 35 references (80.0%)** are from 2022–2026. The seven older references ([2] UNSW-NB15 dataset, [5] OpenFlow seminal, [6] SDN survey, [7] DRCN foundational, [8] Knowledge Plane, [9] Pearl Causality textbook, [10] Polat SDN controller) are foundational works for which no equivalent replacement exists; retaining them is consistent with standard academic citation practice.
+
+The previously flagged reference [31] (Pei et al., 2020, power load forecasting — off-topic and uncited) has been **replaced** with:
+
+> [31] J. Li, X. Qi, W. Ma, and L. Liu, "Path selection for link failure protection in hybrid SDNs," *Future Generation Computer Systems*, vol. 137, pp. 201–215, 2022. https://doi.org/10.1016/j.future.2022.07.016.
+
+**Verification source:** DBLP (uni-trier.de), Semantic Scholar, ResearchGate — confirmed title, authors, journal, volume, pages, year, and DOI. This paper directly addresses SDN path selection for link-failure protection in hybrid SDN/legacy-router networks, which is relevant to Section 2.1's discussion of SDN restoration mechanisms.
+
+---
+
+### R1.3 — Terminology: Profiling Latency vs. Recovery Time
+
+**Response:** Two quantities are now explicitly distinguished in separate manuscript subsections:
+
+- **Computational profiling latency** (§4.5 Computational Complexity): time for the CIRAH algorithm to compute a healing plan. Measured via Campaign 6 isolated CPU profiling: p95 = **8.7 ms on Abilene**, **14.3 ms on GEANT**.
+- **End-to-end recovery time** (§5.2 Recovery Time Analysis): time from fault detection to traffic restoration, including OpenFlow control-plane messaging and switch reconfiguration. Values: **49.4 ms (k=1), 178.9 ms (k=2), 415.0 ms (k=3)** for CIRAH on Abilene.
+
+These are never conflated in the revised manuscript.
+
+---
+
+### R1.4 — Physical SDN Limits
+
+**Response:** Section 6.1 (Limitations) states explicitly: *"The evaluation in this paper is entirely simulation-based. CIRAH has not been validated on physical SDN hardware, Mininet emulation, or P4-programmable switches. The control-plane assumptions (instantaneous state observation, lossless OpenFlow messaging) may not hold in physical deployments. Hardware validation is identified as future work."* No claims of physical deployability beyond the theoretical O(|V|²|E|) complexity analysis are made.
+
+---
+
+### R1.5 — Simulation Scope
+
+**Response:** Experiments use the Abilene topology (11 nodes, 30 edges, Internet2 backbone) and the GEANT topology (22 nodes, 56 edges, European research network), loaded from standard GML files. Section 6.1 states that: (1) synthetic traffic models differ from production traffic distributions; (2) both topologies are well-studied but smaller than hyperscale networks; and (3) generalization to leaf-spine data-center or wide-area Internet topologies requires additional experimentation. These limitations are disclosed and do not invalidate the causal-inference methodology contributions.
+
+---
+
+## Response to Revision 2
+
+---
+
+### C1 — Numerical Reconciliation
+
+**Response:** All manuscript-reported values have been reconciled against `results/hypothesis_tests_cirah_vs_dynamic.csv`. Key corrections:
+
+- k=1 single-failure recovery: CIRAH 49.442 ms, Dynamic-SP 49.184 ms (was mis-stated as 52.4/48.6 ms).
+- CIRAH overhead at k=2: **178.9 ms vs 60.5 ms** — now explicitly disclosed as a trade-off.
+- CIRAH overhead at k=3: **415.0 ms vs 58.8 ms** — now explicitly disclosed.
+- Switch churn reduction at k=2: **13.8%** (3.78 → 3.26, raw p=0.00082).
+- Intervention cost reduction at k=2: **9.3%** (19.02 → 17.25, raw p=0.00089).
+
+The old claims of 77.8% and 75.7% reduction, which appeared in an earlier draft, are absent from the current manuscript.
+
+---
+
+### C2 — Six-Way Ablation Study
+
+**Response:** Table 6 reports all six variants: CIRAH-full, CIRAH-noCausal, CIRAH-noCF, CIRAH-noCIHF, CIRAH-noRisk, CIRAH-noInterv. Each variant disables exactly its named component. Key findings:
+
+- CIRAH-noRisk: success drops from 70.0% to 56.7%; constraint violations increase.
+- CIRAH-noCausal: constraint_violation_pct rises to 1.67% (false-positive actions without causal filtering).
+- CIRAH-noCIHF: healing_psi_mean = 0 (no diffusion-guided weighting).
+- CIRAH-noCF: identical outcome to CIRAH-full under nominal conditions (counterfactual advantage emerges under adversarial traffic; noted as a limitation).
+
+---
+
+### C3 — Bayesian Fault Localization
+
+**Response:** `cirah/bayesian_fault_localizer.py` implements a 3-state CPT (healthy / degraded / failed) with proper normalization: P(H|E) ∝ P(E|H)·P(H), normalized to sum to 1.0 across states. Regression test `test_missing_or_nan_data_rejection` verifies that missing telemetry does not produce unnormalized posteriors.
+
+---
+
+### C4 — SCM Operationalization
+
+**Response:** `cirah/scm_engine.py` implements Pearl's do-calculus twin-graph simulation: (1) the factual graph is fit to observed outcomes; (2) a twin copy applies do(A=a) by severing A's incoming edges and fixing A=a; (3) outcomes are propagated via the same structural equations. The difference between twin and factual outcomes is the individual causal effect. This is a standard simulation-based implementation of the twin network method (Pearl, 2009 [9]).
+
+---
+
+### C5 — Counterfactual Ranking
+
+**Response:** Revised ranking claims are conservative and evidence-grounded:
+- CIRAH Spearman ρ = **0.967 ± 0.021** (N=60 valid trials)
+- Myopic baseline ρ = **0.968 ± 0.065** (N=60 valid trials)
+
+The manuscript states: *"CIRAH provides lower variance in ranking accuracy (σ=0.021 vs 0.065) with statistically equivalent mean rank correlation, suggesting more consistent intervention prioritization."* No claim of strict mean superiority is made.
+
+---
+
+### C6 — CIHF Validation
+
+**Response:** `cirah/cihf_engine.py` implements CIHF as a Laplacian diffusion field: ψ(v) = (I − αL)⁻¹ · s, where L is the graph Laplacian, α is the diffusion coefficient, and s is the source vector of fault severity scores. The CIRAH-noCIHF ablation correctly produces ψ=0 for all nodes.
+
+---
+
+### C7 — Constrained Optimizer
+
+**Response:** `cirah/constrained_optimizer.py` enforces a hard constraint: R_robust = R_post + z_α·σ_R ≤ R_max, where z_α = 1.645 at α=0.95. Any plan violating this constraint triggers the partition fallback (C8). The optimizer raises `RiskCeilingViolation` if no feasible plan exists.
+
+---
+
+### C8 — Partition Fallback
+
+**Response:** Regression test `test_partitioned_network_graceful_fallback` verifies that when no intervention plan satisfies R_robust ≤ R_max, the system returns a `PartitionFallbackResult` with `is_fallback=True` and an explanation message, without raising an unhandled exception.
+
+---
+
+### C9 — Computational Complexity
+
+**Response:** §4.5 provides a step-by-step derivation: the dominant cost is twin-graph simulation (|V| nodes × |E| edges per simulation × |V| candidate interventions = O(|V|²|E|)). Empirical profiling via `cirah/complexity_profiler.py` confirms p95 decision latency **≤ 16 ms** for both topologies (8.7 ms Abilene, 14.3 ms GEANT).
+
+---
+
+### C10 — Experimental Evaluation and Multiple Testing
+
+**Response:** The statistical pipeline implements:
+1. N=50 paired runs per topology/fault-level (seed_i = 6000 + 19·i for i in range(50)).
+2. Paired Wilcoxon signed-rank test for each metric/topology/fault-level.
+3. Holm/Bonferroni FWER correction at two levels: Primary family (N=6, Abilene switches + cost × k=1,2,3) and Omnibus family (N=30, all combinations).
+4. All-zero differences → NaN p-value (non-informative, not excluded).
+5. Pairing validation: duplicate run_ids or seed mismatches raise an error.

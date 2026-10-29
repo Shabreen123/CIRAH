@@ -257,7 +257,7 @@ The algorithmic complexity per failure event decomposes into:
 * CIHF diffusion: $\mathcal{O}(|\mathcal{V}|^2)$ using precomputed inverted kernel $(\mathbf{I} + \sigma \mathbf{L}_{\text{norm}})^{-1}$.
 * Overall runtime complexity per failure event: $\mathcal{O}(K \cdot |\mathcal{V}| \log |\mathcal{V}| + |\mathcal{A}| \cdot (|\mathcal{E}| + |\mathcal{V}|^2))$.
 
-Across 100 independent benchmark profiling runs on commodity hardware (Intel Core i5-8600K, 16 GB RAM), measured **controller algorithmic execution latency** (measuring isolated CPU computation for SCM inference, counterfactual evaluation, CIHF diffusion, and optimizer path selection per single failure cycle, excluding control-plane OpenFlow rule installation and data-plane propagation) was:
+Across 60 independent benchmark profiling runs on commodity hardware (Intel Core i5-8600K, 16 GB RAM), measured **controller algorithmic execution latency** (measuring isolated CPU computation for SCM inference, counterfactual evaluation, CIHF diffusion, and optimizer path selection per single failure cycle, excluding control-plane OpenFlow rule installation and data-plane propagation) was:
 * **Abilene (11 nodes):** Mean = $6.28\text{ ms}$, Median ($p_{50}$) = $5.92\text{ ms}$, 95th-percentile ($p_{95}$) = $8.70\text{ ms}$, Worst-case = $9.15\text{ ms}$.
 * **GEANT (22 nodes):** Mean = $10.78\text{ ms}$, Median ($p_{50}$) = $10.93\text{ ms}$, 95th-percentile ($p_{95}$) = $14.33\text{ ms}$, Worst-case = $15.70\text{ ms}$.
 

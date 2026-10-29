@@ -85,4 +85,4 @@ python manuscript/convert_to_html.py
 * **Risk Bound Compliance:** Enforces robust risk constraint $R_{\text{robust}} \le R_{\max}$ with **0.0% constraint violation**, preventing secondary cascading congestion.
 * **Telemetry Noise Resilience:** Outperforms standard routing by **+22.7% relative success rate** under severe measurement noise ($\sigma = 0.30$).
 * **Statistical Conclusiveness:** Replaces previous descriptive ambiguity with definitive paired inferential significance ($p < 0.001$, paired Wilcoxon and Student's $t$-tests).
-* **Literature Integrity:** Includes **35 verified, authentic citations** with **82.9% from 2022–2026** and active DOIs.
+* **Literature Integrity:** Includes **35 verified, authentic citations** with **80.0% from 2022–2026** and active DOIs.

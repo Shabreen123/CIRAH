@@ -103,7 +103,7 @@ def plot_fig6_latency_and_loss():
     df = pd.read_csv(csv_path)
 
     fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(12, 4.5))
-    methods = ["CIRAH", "CIRAH-noInterv", "Dynamic-SP", "Risk-Aware", "Static-SP"]
+    methods = ["CIRAH", "Dynamic-SP", "Static-SP", "Risk-Aware"]
 
     for m in methods:
         sub = df[df["method"] == m]
@@ -194,7 +194,7 @@ def plot_fig8_residual_risk():
     df_ab = df[df["topology"] == "abilene"]
 
     fig, ax = plt.subplots(figsize=(7, 4.5))
-    methods = ["CIRAH", "CIRAH-noRisk", "Dynamic-SP", "MinChange-SP"]
+    methods = ["CIRAH", "Dynamic-SP", "MinChange-SP", "Risk-Aware"]
 
     for m in methods:
         sub = df_ab[df_ab["method"] == m]
