@@ -44,7 +44,7 @@ L_norm = I - D^{-1/2} W D^{-1/2}
 h(a) = (I + σ L_norm)^{-1} s(a)     with σ = 1.5
 ```
 
-The diffusion kernel has eigenvalues in [0.25, 1.0] (since eigenvalues of L_norm ∈ [0, 2], so I + σL ∈ [1, 4]). This **dampens** the impulse: `h_v ≤ s_v` for all v.
+The diffusion kernel has eigenvalues in [0.265, 1.0] (verified: eigenvalues of L_norm ∈ [0, 1.85] for Abilene, so I + σL ∈ [1, 3.77], inverse ∈ [0.265, 1.0]). The kernel is an **L2-norm contraction** (spectral radius ≤ 1), meaning ‖h‖₂ ≤ ‖s‖₂. However, element-wise dampening does **not** hold: diffusion can spread the impulse to neighboring nodes, causing h_v > s_v at some nodes. For a uniform impulse on Abilene, max(h) = 1.10 while max(s) = 1.0. The aggregate sum is approximately preserved (sum(h) ≈ sum(s)) because the constant-vector eigenvalue of L_norm is 0, giving kernel eigenvalue 1 for uniform inputs.
 
 **Step 5: Aggregate and objective term** (`optimizer.py`)
 
@@ -87,7 +87,7 @@ The CIHF term (0.08) is ~5× smaller than the cost term (0.50) and ~3× smaller 
 | Ψ_ref normalization | 0–2 | 0–0.2 | ÷10 |
 | γ weighting | 0–0.2 | 0–0.16 | ×0.8 |
 
-A raw stress reduction of 100% (severed link rerouted) becomes 0.08 in the objective. The dynamic range is compressed by a factor of ~1250×.
+A raw stress reduction of 100% (severed link rerouted) becomes 0.078 in the objective (verified from actual data). The CIHF objective term (mean 0.078) is **0.11× the cost term** (0.72) and **0.02× the risk term** (3.46). The "1250× compression" claim in the original draft compared per-node raw stress (100) to the aggregate objective term (0.078), which is not a valid single-stage compression ratio — it conflates per-node maximums with aggregate sums across normalization stages. The accurate statement: the CIHF term spread across candidates (0.097) is too small relative to the spread in cost and risk terms to change the argmin.
 
 ### 1.3 Diagnostic Evidence (from previous runtime verification)
 
@@ -237,14 +237,14 @@ CSRF produces **lower** Ψ values (0.41) than the original CIHF (0.98). The comp
 - **Runs**: 20 per scenario × gamma = 720 records
 - **Output file**: `results/cihf_gamma_sensitivity.csv`
 
-### 4.2 Disagreement Rate by Gamma
+### 4.2 Action-Selection Agreement Rate by Gamma
 
 | Scenario | γ=0.0 | γ=0.4 | γ=0.8 | γ=1.6 | γ=3.2 | γ=6.4 |
 |---|---|---|---|---|---|---|
 | mixed_stress | 100% | 95% | 100% | 100% | 100% | 100% |
 | tight_capacity | 100% | 100% | 100% | 100% | 100% | 100% |
 
-Even at γ=6.4 (8× the default), CIHF does not consistently change candidate selection. The single disagreement at γ=0.4 in mixed_stress is likely due to non-deterministic noise in `diagnose_causal_faults` (which uses unseeded `np.random.normal`), not a genuine CIHF effect.
+Values report the percentage of runs where all three tested modes (cihf, csrf, none) selected the **same** action. 100% = complete agreement; 95% = one run out of 20 had disagreement. The single disagreement at γ=0.4 in mixed_stress is likely due to non-deterministic noise in `diagnose_causal_faults` (which uses unseeded `np.random.normal`), not a genuine CIHF effect.
 
 ### 4.3 Mean Ψ by Gamma
 
@@ -306,7 +306,7 @@ All component tests PASSED successfully!  (test_components)
 
 ### 6.1 Confirmed Defects
 
-1. **CIHF does not influence candidate selection** (confirmed across 220+ scenarios). The normalization chain (÷100 → diffusion dampening → ÷10) compresses the dynamic range by ~1250×, making the CIHF term ~5× smaller than the cost term and ~3× smaller than the risk term.
+1. **CIHF does not influence candidate selection** (confirmed across 220+ scenarios). The CIHF objective term (mean 0.078) is 0.11× the cost term and 0.02× the risk term. The CIHF term spread across candidates (0.097) is insufficient to change the argmin.
 
 2. **CSRF (proposed alternative) also does not influence selection** and produces lower Ψ values than the original CIHF. The composite stress measure dilutes the loss signal.
 
@@ -354,3 +354,108 @@ The CIHF component, in all tested formulations (original Laplacian diffusion, lo
 | Test result | 26/26 OK |
 | Experiment command | `python experiments/cihf_comparison.py` |
 | Baseline CSVs | Preserved (not overwritten) |
+
+---
+
+## 8. Phase G — Mathematical and Reporting Verification
+
+### G.1 Diffusion Bound Verification
+
+**Claim tested**: "The diffusion kernel dampens the impulse: h_v ≤ s_v for all v."
+
+**Result**: The claim is **false** as stated. The kernel (I + σ·L_norm)^(-1) with σ=1.5 on Abilene has eigenvalues in [0.265, 1.0], confirming it is an L2-norm contraction (‖h‖₂ ≤ ‖s‖₂). However, element-wise dampening does not hold:
+
+- For a unit impulse at one node: max(h) = 0.46 ≤ max(s) = 1.0 (true for this case)
+- For a uniform impulse across all nodes: max(h) = 1.10 > max(s) = 1.0 (**violated**)
+- For a half-uniform impulse: max(h) = 0.55 > max(s) = 0.50 (**violated**)
+
+Diffusion spreads the impulse to neighboring nodes, which can increase individual node values above their original impulse. The correct mathematical statement: the kernel is a spectral contraction (all eigenvalues ≤ 1), but not a pointwise contraction. The aggregate sum is approximately preserved because the constant-vector eigenvalue of L_norm is 0, giving the kernel eigenvalue 1 for uniform inputs.
+
+**Correction applied**: Section 1.1 Step 4 has been updated to reflect this finding.
+
+### G.2 Normalization Compression Calculation
+
+**Claim tested**: "The dynamic range is compressed by a factor of ~1250×."
+
+**Result**: The 1250× figure is **misleading**. It compares a per-node raw stress maximum (100% loss at one node) to the aggregate objective term (0.078), conflating per-node maximums with aggregate sums across multiple normalization stages.
+
+**Actual observed values** (from 720-run comparison):
+
+| Quantity | Mean | Min | Max |
+|---|---|---|---|
+| CIHF Ψ | 0.977 | 0.573 | 1.790 |
+| CIHF term (γΨ/Ψ_ref) | 0.078 | 0.046 | 0.143 |
+| Cost term (λ_I·C_I/C_I,ref) | 0.720 | — | — |
+| Risk term (β·R_post/R_max) | 3.455 | — | — |
+
+The CIHF term is 0.11× the cost term and 0.02× the risk term. The meaningful metric is the CIHF term **spread** across candidates within a run (0.097), which is too small to overcome differences in other terms.
+
+**Correction applied**: Sections 1.2 and 6.1 have been updated with accurate ratios.
+
+### G.3 Gamma Table Label
+
+**Claim tested**: Section 4.2 was labeled "Disagreement Rate by Gamma" with values showing 100% and 95%.
+
+**Result**: The label was **incorrect**. The underlying column `all_modes_agree` reports the percentage of runs where all modes selected the same action (1 = agreement). Values of 100% and 95% mean 100% agreement and 95% agreement, not disagreement. Only 1/720 runs showed any disagreement (mixed_stress, γ=0.4).
+
+**Correction applied**: Label changed to "Action-Selection Agreement Rate by Gamma" with explicit clarification.
+
+### G.4 Success Metric Definition
+
+**Implementation traced** (`controller_sim.py`, `execute_self_healing_cycle`):
+
+```python
+success = bool(target_res.get("connected", False) and target_res.get("sla_met", False))
+```
+
+Where:
+- `connected`: Path has no link with predicted loss ≥ 99% (i.e., no severed link in the path)
+- `sla_met`: `latency ≤ sla_max_latency_ms` AND `loss ≤ sla_max_loss_pct` for the target flow
+- **Denominator**: Total number of runs (not total flows). Only the target flow (flows[0] or first impaired flow) is evaluated per run.
+- **Scope**: Per-run, per-target-flow binary indicator. Other flows' outcomes are not included in the success metric.
+
+**Why 38.3% overall**: The four scenarios have very different difficulty levels:
+
+| Scenario | Success rate | Difficulty driver |
+|---|---|---|
+| standard | 53.3% | Moderate — 25% of links have reduced capacity |
+| tight_capacity | 43.3% | Hard — all links at 80 Mbps, high cross-traffic |
+| mixed_stress | 23.3% | Very hard — random capacity degradation + random loss on many links |
+| multi_fault | 33.3% | Hard — 3 simultaneous link failures |
+
+The mixed_stress scenario (23.3%) and multi_fault (33.3%) drag down the average. All 6 CIHF modes produce the same success rate because they select from the same candidate set under the same risk constraints.
+
+### G.5 Independent Contribution: Action Change vs. Outcome Improvement
+
+**Distinction**: A scoring mode "changing the selected action" means the argmin of J differs. A scoring mode "improving the outcome" means the independently evaluated recovery success, latency, or risk is better. These are different: a mode can change the action without improving outcomes, or fail to change the action (and thus trivially not improve outcomes).
+
+**Paired statistical comparison** (CIHF vs. None, 120 paired runs):
+
+| Metric | Mean diff (CIHF−None) | 95% CI | Wilcoxon p | Significant? |
+|---|---|---|---|---|
+| Success | 0.0000 | — | — | No discordant pairs |
+| Switches | −0.0083 | [−0.025, 0.008] | 0.317 | No |
+| Cost | −0.0125 | [−0.037, 0.012] | 0.317 | No |
+| Risk | +0.0075 | [−0.007, 0.022] | 0.317 | No |
+
+**CSRF vs. None**: All differences are exactly zero — identical outcomes in every run.
+
+**Interpretation**: CIHF changes the selected action in only 1/120 runs (0.8%), and in that case both selections succeed equally. The paired comparison shows no statistically significant difference in any outcome metric. CSRF produces zero outcome differences. This confirms that CIHF (in any tested form) does not improve recovery decisions — it neither changes actions nor improves outcomes.
+
+### G.6 Final Decision on CIHF
+
+**Recommendation**: CIHF should **not remain a decision-making component** in its current form. The evidence:
+
+1. **No action change**: CIHF changed selection in 0/100 diagnostic scenarios and 1/120 comparison runs (0.8%).
+2. **No outcome improvement**: Paired comparison shows zero success difference and no significant cost/risk/switches difference (all p ≥ 0.317).
+3. **CSRF also fails**: The proposed alternative produces even lower Ψ and zero outcome differences.
+4. **Gamma scaling fails**: Even at γ=6.4 (8× default), CIHF does not consistently change selection.
+5. **Root cause is structural**: All viable reroute candidates reduce stress at the same nodes (those adjacent to the severed link), producing similar Ψ values. The CIHF term cannot differentiate candidates that differ in cost/risk but not in stress-reduction pattern.
+
+**Options for the manuscript**:
+
+- **Option A (Redesign)**: Redefine the field to measure second-order cascade prevention (how much the intervention reduces congestion on paths used by OTHER flows). This could differentiate candidates that have similar first-order stress reduction but different multi-flow cascade effects. This requires new algorithmic work and validation.
+- **Option B (Interpretive visualization)**: Retain CIHF as a post-hoc visualization of spatial stress relief, explicitly disclaiming any decision-making role. Remove it from the objective function. The ablation study would then show identical results with and without CIHF, reported honestly.
+- **Option C (Remove)**: Remove CIHF from the paper entirely and focus the contribution on the counterfactual evaluation (which demonstrably changes decisions) and the risk constraint (which demonstrably affects success).
+
+**Recommended path for faculty revisions**: Option B or C, depending on whether the manuscript needs a "healing field" contribution for positioning. If CIHF must remain as a claimed contribution, Option A requires implementing and validating a genuinely different field definition — one that captures multi-flow or cascade-prevention effects not already measured by R_post.
