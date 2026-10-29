@@ -34,7 +34,8 @@ class CIRAHController:
                  beta: float = 1.2,
                  gamma: float = 0.8,
                  tau: float = 0.75,
-                 r_max: float = 35.0):
+                 r_max: float = 35.0,
+                 cihf_mode: str = None):
         self.topology = topology
         self.mode = mode
         self.name = f"CIRAH" if mode == "full" else f"CIRAH-{mode}"
@@ -48,7 +49,11 @@ class CIRAHController:
         eff_lambda_I = 0.0 if mode == "no_interv" else lambda_I
         eff_beta = 0.0 if mode == "no_risk" else beta
         eff_gamma = 0.0 if mode == "no_cihf" else gamma
-        cihf_mode = "none" if mode == "no_cihf" else "cihf"
+        # Allow custom cihf_mode override; default based on ablation mode
+        if cihf_mode is not None:
+            cihf_scoring = cihf_mode
+        else:
+            cihf_scoring = "none" if mode == "no_cihf" else "cihf"
         self.enforce_risk = (mode != "no_risk")
         self.is_myopic = (mode == "no_cf")
 
@@ -60,7 +65,7 @@ class CIRAHController:
             gamma=eff_gamma,
             tau=tau,
             r_max=r_max,
-            cihf_mode=cihf_mode
+            cihf_mode=cihf_scoring
         )
 
     def execute_self_healing_cycle(self,

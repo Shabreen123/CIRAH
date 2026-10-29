@@ -165,9 +165,20 @@ class RiskConstrainedOptimizer:
                 out_loss = sum(cf_res["cf_link_losses"].get((n, v), 0.0) for v in causal_engine.G.successors(n))
                 post_node_stress[n] = float(out_loss)
 
-            h_field = healing_propagator.construct_healing_field(
-                cand, pre_node_stress, post_node_stress, scoring_mode=self.cihf_mode
-            )
+            if self.cihf_mode in ("csrf", "congestion"):
+                # Phase B/C modes require full counterfactual results
+                if self.cihf_mode == "csrf":
+                    h_field = healing_propagator.construct_csrf_field(
+                        cand, cf_res, all_flows, causal_engine.G, current_telemetry
+                    )
+                else:  # congestion
+                    h_field = healing_propagator.construct_congestion_field(
+                        cand, cf_res, causal_engine.G, current_telemetry
+                    )
+            else:
+                h_field = healing_propagator.construct_healing_field(
+                    cand, pre_node_stress, post_node_stress, scoring_mode=self.cihf_mode
+                )
             psi = healing_propagator.compute_aggregate_healing_gain(h_field)
 
             # Target flow latency penalty: normalized path latency + SLA excess penalty
