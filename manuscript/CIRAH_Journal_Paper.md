@@ -9,16 +9,18 @@
 * Formulates a Structural Causal Model (SCM) connecting physical faults, queuing dynamics, routing interventions, and end-to-end SLA outcomes.
 * Establishes a 3-state Bayesian fault localization model ($F_e \in \{0, 1, 2\}$) with normalized path evidence multipliers across all candidate states.
 * Evaluates candidate actions prior to execution using Pearl's counterfactual $do(A=a)$ calculus with fixed exogenous background noise.
-* Introduces the Causal Intervention Healing Field (CIHF) via normalized graph Laplacian heat diffusion to quantify spatial stress relief beyond local link utilization.
+* Introduces the Causal Intervention Healing Field (CIHF) via normalized graph Laplacian heat diffusion to quantify spatial stress relief beyond local link utilization. Controlled experiments across 720 paired runs demonstrate that CIHF does not change the selected recovery action in 99.2% of tested scenarios; its contribution to the objective function is dominated by cost and risk terms. CIHF is retained as an interpretive stress-relief visualization rather than a decision-changing component.
 * Formulates a normalized, risk-constrained optimization problem enforcing robust risk bounds ($R_{\text{post}} \le R_{\max}$) alongside a multi-tier safe fallback mechanism that detects physical network partitions.
-* Validated through approximately 4,920 paired Monte Carlo runs across Abilene (11 nodes) and GEANT (22 nodes) backbones, showing statistically verified switch churn reductions ($13.8\%$ to $19.7\%$, $p < 0.01$) over dynamic shortest-path rerouting.
+* Validated through over 4,900 paired Monte Carlo runs across Abilene (11 nodes) and GEANT (22 nodes) backbones, showing statistically verified switch churn reductions ($13.8\%$ to $19.7\%$, $p < 0.01$) over dynamic shortest-path rerouting.
 
 ---
 
 ## Abstract
 Modern software-defined communication networks are subject to unpredictable link outages, performance degradation, and cascading congestion that jeopardize strict service-level agreements (SLAs). Conventional self-healing techniques rely on reactive shortest-path recomputation or correlation-based heuristic rerouting; however, these approaches frequently trigger excessive switch reconfiguration churn, control-plane message storms, and secondary congestion cascades across un-intervened paths. This paper presents **CIRAH** (**C**ausal-**I**ntervention **R**isk-constrained **A**utonomous network self-**H**ealing), an optimization framework for autonomous network restoration. CIRAH establishes an explicit Structural Causal Model (SCM) connecting physical faults, link degradation, dynamic M/M/1 queuing delays, routing topology, and end-to-end service outcomes. Leveraging Pearl's counterfactual $do$-calculus, CIRAH estimates the consequence of candidate interventions prior to execution and models spatial stress relaxation via a continuous Causal Intervention Healing Field (CIHF) governed by normalized graph Laplacian heat diffusion. A constrained combinatorial optimizer selects the minimum-cost intervention set that satisfies robust post-recovery risk ceilings ($R_{\text{post}} \le R_{\max}$) and SLA recovery confidence thresholds ($\tau$), supported by an automated safe fallback mechanism that identifies physical network partitions. We evaluate CIRAH across realistic Abilene (11 nodes, 30 directed edges) and GEANT (22 nodes, 56 directed edges) topologies under diverse failure modes, including concurrent multi-link failures ($k=1$ to $4$), link capacity brownouts, bufferbloat delay spikes, and corrupted telemetry. Across paired Monte Carlo runs on the Abilene topology under double-link failures ($k=2$), CIRAH reduces the mean number of modified switches from 3.78 to 3.26 (a 13.8% reduction, $p = 0.00082$, paired Cohen's $d_z = -0.56$) and decreases mean control-plane intervention cost from 19.02 to 17.25 (a 9.3% reduction, $p = 0.00089$), while achieving an identical recovery success rate of 72.0% as reactive Dynamic-SP. Under single-link failures ($k=1$), switch modifications are reduced by 19.7% ($2.84 \to 2.28$, $p = 0.00206$). A dedicated 6-way ablation study demonstrates that omitting the hard risk constraint drops recovery success from 70.0% to 56.7% and elevates SLA violations to 43.3% with higher post-repair risk (8.57), while omitting the intervention cost penalty increases switch modification churn to 3.78 switches and removing the healing field reduces spatial stress dissipation gain to zero.
 
-**Keywords:** Autonomous network self-healing, Structural Causal Models, Pearl's $do$-calculus, minimum-causal intervention, risk-constrained optimization, graph Laplacian diffusion, Software-Defined Networking (SDN).
+**Keywords:** Autonomous network self-healing, Structural Causal Models, Pearl's $do$-calculus, minimum-causal intervention, risk-constrained optimization, Software-Defined Networking (SDN).
+
+**Limitations:** All results are from simulation on Abilene and GEANT topologies without physical SDN hardware validation. The Causal Intervention Healing Field (CIHF) is correctly implemented but does not influence candidate selection in 99.2% of tested scenarios; its contribution to the objective function is dominated by intervention cost and risk terms. Counterfactual evaluation changes action selection under tight capacity constraints but produces identical outcomes under the default wide-capacity scenarios tested in the ablation campaign.
 
 ---
 
@@ -56,7 +58,7 @@ We formulate four testable hypotheses:
 ### 1.4 Revised Technical Contributions
 1. **Causal fault-to-recovery formulation:** A formally specified structural causal model connecting link faults, traffic conditions, M/M/1 queuing behavior, routing interventions, and end-to-end service outcomes. Its assumptions, identifiability limitations, and predictive accuracy are explicitly evaluated.
 2. **Intervention-aware recovery optimization:** A constrained recovery formulation that jointly accounts for control-plane reconfiguration cost, service disruption, residual network risk, and SLA feasibility. Its solution quality is compared with established constrained routing methods.
-3. **Network-wide intervention impact estimation:** A graph-based stress-relief mechanism (CIHF) whose contribution is evaluated against conventional graph diffusion, direct congestion metrics, and alternative graph-based scoring methods.
+3. **Network-wide intervention impact estimation:** A graph-based stress-relief mechanism (CIHF) whose contribution is evaluated against conventional graph diffusion, direct congestion metrics, and alternative graph-based scoring methods. Controlled experiments demonstrate that CIHF does not change action selection under tested conditions; it is retained as an interpretive visualization of spatial stress relief.
 4. **Uncertainty-aware risk handling:** A clearly defined method for evaluating risk under uncertain telemetry and counterfactual predictions, with robust risk bounds and empirical constraint-violation measurements.
 5. **Reproducible experimental validation:** A systematic evaluation across failure severity, telemetry uncertainty, traffic variation, and network topology, including independently verified 6-way ablations, paired statistical comparisons ($N=50$ to $60$ runs per condition), and open-source implementation details.
 
@@ -267,6 +269,42 @@ This profiling demonstrates that isolated algorithmic decision execution complet
 
 ## 4. Experimental Methodology & Setup
 
+### 4.0 Parameter Configuration
+
+**Table 2a: CIRAH Algorithm Parameters**
+
+| Parameter | Symbol | Value | Description |
+|:---|:---|:---|:---|
+| Intervention cost weight | $\lambda_I$ | 1.0 | Weight on normalized control-plane cost $C_I/C_{I,\text{ref}}$ |
+| Disruption cost weight | $\lambda_D$ | 0.5 | Weight on normalized transient disruption $C_D/C_{D,\text{ref}}$ |
+| Latency SLA weight | $\lambda_L$ | 0.3 | Weight on normalized SLA degradation $C_L/C_{L,\text{ref}}$ |
+| Risk penalty weight | $\beta$ | 1.2 | Weight on normalized residual risk $R_{\text{post}}/R_{\max}$ |
+| Healing field weight | $\gamma$ | 0.8 | Weight on normalized healing gain $\Psi/\Psi_{\text{ref}}$ |
+| Recovery confidence | $\tau$ | 0.75 | Minimum $P(\text{recovered} \mid do(a))$ for feasibility |
+| Risk ceiling | $R_{\max}$ | 35.0 | Hard post-recovery risk threshold |
+| Confidence quantile | $z_\alpha$ | 1.645 | 95% one-sided Gaussian quantile for robust bound |
+| Risk uncertainty | $\sigma_R$ | $0.08 \cdot R_{\text{post}}$ | Estimated risk standard deviation (8% of post-risk) |
+| CIHF diffusion | $\sigma$ | 1.5 | Laplacian diffusion parameter (spatial decay radius) |
+| K-shortest paths | $K$ | 6 | Maximum candidate paths generated per failure event |
+| $C_I$ reference | $C_{I,\text{ref}}$ | 30.0 | Normalization scale for intervention cost |
+| $C_D$ reference | $C_{D,\text{ref}}$ | 50.0 | Normalization scale for disruption cost |
+| $C_L$ reference | $C_{L,\text{ref}}$ | 40.0 | Normalization scale for latency penalty |
+| $\Psi$ reference | $\Psi_{\text{ref}}$ | 10.0 | Normalization scale for healing gain |
+| Rule weight | $w_{\text{rule}}$ | 1.0 | Cost per OpenFlow FLOW_MOD entry |
+| Switch weight | $w_{\text{sw}}$ | 2.5 | Cost per switch modification |
+| Message weight | $w_{\text{msg}}$ | 0.5 | Control-plane barrier/echo overhead |
+| Disruption weight | $w_{\text{flow}}$ | 5.0 | Service penalty per interrupted flow |
+| Rule commit delay | $\Delta t_{\text{commit}}$ | 12 ms | Hardware rule commit time per switch |
+| Fallback throttle (partition) | — | 0.50 | Ingress rate limit when physical partition detected |
+| Fallback throttle (risk) | — | 0.75 | Ingress rate limit for risk-violating connected paths |
+| Bayesian priors | $P(F_e{=}0)$ | 0.95 | Prior probability of normal link state |
+| | $P(F_e{=}1)$ | 0.03 | Prior probability of degraded link state |
+| | $P(F_e{=}2)$ | 0.02 | Prior probability of severed link state |
+| Traffic flows | — | 8–9 | Concurrent flows per experiment run |
+| Flow demand | — | 10–45 Mbps | Per-flow bandwidth demand range |
+| SLA latency | — | $1.8$–$2.5 \times$ base | Maximum allowable end-to-end latency |
+| SLA loss | — | $1.0$–$3.0\%$ | Maximum allowable packet loss |
+
 ### 4.1 Topologies
 1. **Abilene Internet2 Backbone:** 11 nodes, 30 directed edges, 1000 Mbps capacity, realistic geographical propagation delays (5 to 28 ms).
 2. **GEANT Pan-European Research Backbone:** 22 nodes, 56 directed edges, 1000 Mbps core chords, 500 Mbps regional branches.
@@ -376,8 +414,8 @@ Table 4 empirically establishes the independent contributions of CIRAH's core mo
 1. **Hard Risk Constraint (`CIRAH-noRisk`):** Removing the hard risk ceiling drops recovery success from $70.0\%$ to $56.7\%$ and surges SLA violations from $30.0\%$ to $43.3\%$, while increasing residual risk to $8.57$. Without risk gating, unconstrained optimization greedily routes traffic through heavily loaded bottlenecks that trigger secondary buffer drops.
 2. **Intervention Cost Penalty (`CIRAH-noInterv`):** Setting $\lambda_I = 0$ removes the penalty on switch churn, leading to an increase in switch modifications from $3.60$ to $3.78$ and elevating intervention cost to $19.53$. Without churn awareness, the controller indiscriminately triggers OpenFlow rule modifications for marginal delay improvements.
 3. **Causal Traceback (`CIRAH-noCausal`):** Relying on correlation-based heuristics rather than Bayesian multi-path traceback increases post-repair risk from $7.06$ to $8.29$ and introduces constraint violations ($1.7\%$) due to false-positive fault localization under cross-traffic noise.
-4. **Healing Field (`CIRAH-noCIHF`):** Eliminating the graph Laplacian diffusion field ($\gamma = 0$) causes the spectral healing gain to collapse to $\Psi = 0.000$, depriving the optimizer of spatial stress relief insights across adjacent clusters.
-5. **Counterfactual Evaluation (`CIRAH-noCF`):** Evaluating candidate paths using observational metrics rather than counterfactual $do(A)$ calculus yields nearly identical path selection on the Abilene topology under nominal link margins ($7.04$ vs. $7.06$ residual risk; identical $3.60$ switches modified). As established in Section 5.5, both counterfactual and myopic estimators achieve comparable high action-ranking concordance against the independent data plane ($\rho = 0.967 \pm 0.021$ vs. $\rho = 0.968 \pm 0.065$), while primary topological steering under moderate load is governed by the risk constraint and intervention penalty.
+4. **Healing Field (`CIRAH-noCIHF`):** Eliminating the graph Laplacian diffusion field ($\gamma = 0$) causes the spectral healing gain to collapse to $\Psi = 0.000$, depriving the optimizer of spatial stress relief insights across adjacent clusters. Controlled comparison across 720 paired runs (`cihf_comparison_results.csv`) confirms that CIHF removal does not change recovery success, switch modifications, intervention cost, or residual risk — only the internal $\Psi$ metric differs. The CIHF term contributes approximately $0.078$ to the objective, which is $0.11\times$ the cost term ($0.720$) and $0.02\times$ the risk term ($3.455$). The CIHF is retained as an interpretive stress-relief visualization rather than a decision-changing component.
+5. **Counterfactual Evaluation (`CIRAH-noCF`):** Evaluating candidate paths using observational metrics rather than counterfactual $do(A)$ calculus yields nearly identical path selection on the Abilene topology under nominal link margins ($7.04$ vs. $7.06$ residual risk; identical $3.60$ switches modified). As established in Section 5.5, both counterfactual and myopic estimators achieve comparable high action-ranking concordance against the independent data plane ($\rho = 0.967 \pm 0.021$ vs. $\rho = 0.968 \pm 0.065$), while primary topological steering under moderate load is governed by the risk constraint and intervention penalty. Targeted diagnostic experiments with tight capacity constraints (80 Mbps links, 40 Mbps cross-traffic) demonstrate that counterfactual evaluation changes the selected action in 100\% of tested scenarios, distinguishing paced (throttled) from non-paced variants by modeling traffic displacement effects. Under the default wide-capacity conditions (1000 Mbps links) used in the ablation campaign, traffic displacement does not cause congestion, and both methods produce identical outcomes.
 
 ### 5.5 Counterfactual Prediction Accuracy & Independent Physical Validation
 To prevent circular evaluation (Audit Phase 3), Campaign 5 evaluates counterfactual predictions against an **independent stochastic finite-buffer data-plane simulator** (`simulate_independent_dataplane`) that simulates physical queue dynamics, traffic burstiness, and buffer overflow tail drops across $N=60$ trials:
@@ -426,13 +464,16 @@ The paired difference $95\%$ confidence interval for switch churn at $k=2$ stric
 * **Construct Validity:** Intervention cost is modeled using OpenFlow message weights and switch reconfiguration delay proxies ($\Delta t_{\text{commit}} = 12\text{ ms}$). While representative of merchant silicon switches, hardware-specific commit latencies may vary.
 * **Internal Validity:** Random seed pairing was strictly enforced to guarantee identical network conditions across algorithms.
 * **External Validity:** Evaluations utilized realistic Abilene and GEANT backbones. While capturing real ISP topologies, datacenter leaf-spine fabrics with extreme multi-pathing require further benchmarking.
+* **CIHF Limitation:** Controlled experiments across 720 paired runs demonstrate that the Causal Intervention Healing Field does not change the selected recovery action in 99.2\% of tested scenarios. The CIHF objective term (mean $0.078$) is $0.11\times$ the cost term and $0.02\times$ the risk term. Increasing the weight $\gamma$ up to $6.4$ (8$\times$ default) does not consistently change selection. CIHF is retained as an interpretive stress-relief visualization rather than a decision-changing component.
+* **Counterfactual Evaluation Scope:** The counterfactual $do(A)$ mechanism changes action selection under tight capacity constraints (80 Mbps links, 40 Mbps cross-traffic) but produces identical outcomes to myopic evaluation under the default wide-capacity conditions (1000 Mbps) used in the ablation campaign. The reported ablation results reflect wide-capacity scenarios; tight-capacity results are documented in the CIHF diagnostic report.
+* **Risk Constraint Assumptions:** The robust risk bound $R_{\text{robust}} = R_{\text{post}} + z_\alpha \cdot \sigma_R$ uses a heuristic uncertainty estimate $\sigma_R = 0.08 \cdot R_{\text{post}}$ rather than an empirically calibrated variance. The $z_\alpha = 1.645$ quantile provides a 95\% one-sided bound on estimated mean risk, not on individual recovery outcomes. The bound is valid under the assumption that risk estimation errors are approximately Gaussian; violation of this assumption would require recalibration.
 * **Reproducibility:** All topology definitions, causal equations, simulation runners, and raw result CSV files are fully open-sourced in the project repository.
 
 ---
 
 ## 9. Conclusion and Future Scope
 
-This paper presented **CIRAH**, a causal-intervention optimization framework for autonomous network self-healing under risk constraints. By formalizing network dynamics as an SCM, computing Pearl's counterfactual interventional outcomes $do(A=a)$, and diffusing stress relief via graph Laplacian healing fields, CIRAH systematically discovers the minimum-cost recovery action that satisfies post-repair risk limits. Across approximately 4,920 paired Monte Carlo simulations on Abilene and GEANT topologies, CIRAH demonstrated a statistically verified reduction in switch churn ($13.8\%$ to $19.7\%$, $p < 0.01$) over reactive shortest-path rerouting while maintaining risk compliance.
+This paper presented **CIRAH**, a causal-intervention optimization framework for autonomous network self-healing under risk constraints. By formalizing network dynamics as an SCM, computing Pearl's counterfactual interventional outcomes $do(A=a)$, and enforcing robust post-recovery risk limits, CIRAH systematically discovers the minimum-cost recovery action that satisfies post-repair risk constraints. Across over 4,900 paired Monte Carlo simulations on Abilene and GEANT topologies, CIRAH demonstrated a statistically verified reduction in switch churn ($13.8\%$ to $19.7\%$, $p < 0.01$) over reactive shortest-path rerouting while maintaining risk compliance. The 6-way ablation study established that the hard risk constraint is the most impactful component (success drops from 70.0\% to 56.7\% when removed), followed by the intervention cost penalty. The Causal Intervention Healing Field (CIHF) was found to not influence candidate selection under tested conditions; it is retained as an interpretive visualization. Counterfactual evaluation changes action selection under tight capacity constraints but produces identical outcomes under the default wide-capacity scenarios.
 
 **Future Work:** We plan to deploy CIRAH on a distributed hardware testbed with physical P4 programmable switches to evaluate sub-millisecond line-rate counterfactual inference.
 

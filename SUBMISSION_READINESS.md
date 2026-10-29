@@ -1,8 +1,8 @@
 # CIRAH Submission Readiness Assessment
 
 **Branch:** cirah-final-audit  
-**Date:** 2026-10-26  
-**Assessed by:** Automated audit pipeline (verified by execution)
+**Date:** 2026-10-29 (updated)  
+**Assessed by:** Runtime verification pipeline (AI-assisted, verified by execution)
 
 ---
 
@@ -10,24 +10,50 @@
 
 | Gate | Status |
 |---|---|
-| **Ready for faculty revision review** | **✅ YES — SUBMIT** |
-| **Ready for SCI Q1 journal submission** | **⚠️ NOT YET** — simulation-only; hardware validation required |
+| **Internal technical verification** | **✅ COMPLETE** — 26/26 tests pass, experiments reproducible |
+| **Faculty Revision 3 requirements** | **⚠️ PARTIALLY MET** — 7 MET, 12 PARTIALLY MET, 5 NOT MET, 2 BLOCKED |
+| **Ready for SCI Q1 journal submission** | **❌ NOT YET** — critical experimental gaps remain |
 
 ---
 
-## Faculty Review: SUBMIT ✅
+## Revision 3 Status Summary
 
-All previously identified blockers are resolved:
+| Status | Count | Items |
+|---|---|---|
+| MET | 7 | S2, S5, S6, S7, S8, L2, W4 |
+| PARTIALLY MET | 12 | Rev3-2, Rev3-3, Rev3-4, Rev3-7, Rev3-8, S1, S3, S4, M1, M2, M3, M4, L1, L3, W1, W2, W3, W5 |
+| NOT MET | 5 | Rev3-1, Rev3-5, Rev3-6, W6 (now resolved), W5 |
+| BLOCKED | 2 | Hardware testbed, exact MIP oracle |
 
-| Former Blocker | Status |
-|---|---|
-| B1 — Reference [31] (Pei et al. 2020, off-topic, uncited, pre-2022) reduced recency to 77.1% | **RESOLVED** — replaced with Li et al. 2022 (hybrid SDN path selection, DOI verified) → 28/35 = **80.0%** |
-| B2 — 16 uncited bibliography entries | **RESOLVED** — all 35 references now cited (§2.1, §2.2, §2.4 expanded) |
+See `REVISION_3_TRACEABILITY.md` for the full requirement-by-requirement matrix.
 
-### Passing Criteria (24/25 PASS, 1 PARTIAL)
+---
 
-- ✅ 13/13 regression tests pass (`test_audited_defects`)
-- ✅ All component tests pass (`test_components.py`)
+## Critical Unresolved Items
+
+1. **CIHF (Rev3-1):** Not strengthened as requested. Honestly reframed as limitation. NOT MET per reviewer's stated requirement.
+2. **Stronger baselines (Rev3-5):** No constrained minimum-change optimizer. NOT MET.
+3. **Larger networks (Rev3-6):** No topologies beyond 22 nodes. NOT MET.
+4. **Bayesian classification metrics (Rev3-M2):** No precision/recall/F1. PARTIALLY MET.
+5. **Model misspecification (Rev3-7):** No distribution-shift evaluation. PARTIALLY MET.
+
+---
+
+## What Has Been Verified
+
+- ✅ 26/26 tests pass (13 regression + 13 CIHF mode)
+- ✅ All component tests pass
+- ✅ All 6 experiment campaigns reproducible (minor timing/non-determinism variation)
+- ✅ No statistical significance decisions changed on regeneration
+- ✅ All manuscript equations match source code
+- ✅ CIHF limitation honestly documented (720-run controlled comparison, paired stats)
+- ✅ Counterfactual capacity-dependence explained
+- ✅ Parameter table added (Table 2a)
+- ✅ Risk constraint assumptions documented
+- ✅ `requirements.txt` with pinned versions
+- ✅ `REPRODUCIBILITY.md` corrected (GML claim, seeds, run counts, non-determinism)
+- ✅ Reference recency verified (80.0% from 2022-2026, 0 uncited)
+- ✅ Baseline CSVs preserved (not overwritten)
 - ✅ Statistical analysis: 0 warnings; CSV regenerated
 - ✅ `git diff --check`: 0 whitespace issues
 - ✅ HTML regenerated: `manuscript/CIRAH_Journal_Paper.html`
