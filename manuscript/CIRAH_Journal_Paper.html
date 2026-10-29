@@ -65,6 +65,16 @@ body {
 }
 
 .paper-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 30px auto;
+    padding: 25mm;
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    page-break-after: always;
+}
+
     max-width: 840px;
     margin: 30px auto;
     background: #ffffff;
@@ -154,6 +164,11 @@ ul.academic-list li, ol.academic-list li {
 .table-container {
     margin: 20px 0;
     page-break-inside: avoid;
+    overflow: visible;
+}
+
+    margin: 20px 0;
+    page-break-inside: avoid;
     overflow-x: auto;
 }
 .academic-table {
@@ -224,6 +239,16 @@ hr.divider {
         font-size: 9.5pt;
     }
     .paper-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 30px auto;
+    padding: 25mm;
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    page-break-after: always;
+}
+
         width: 100% !important;
         max-width: 100% !important;
         margin: 0 !important;
@@ -239,6 +264,59 @@ hr.divider {
     .figure-container, .table-container, pre {
         page-break-inside: avoid !important;
     }
+}
+
+/* New pagination and equation overflow handling */
+@media screen {
+  .paper-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 30px auto;
+    padding: 25mm;
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    page-break-after: always;
+}
+
+    width: 210mm;
+    min-height: 297mm;
+    margin: 30px auto;
+    padding: 25mm;
+    background: #fff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    page-break-after: always;
+    column-fill: auto;
+    column-width: 210mm;
+    column-gap: 0;
+  }
+}
+/* Ensure equations fit width */
+.MathJax, .MathJax_Display, .MathJax_SVG, .MathJax_CHTML {
+  max-width: 100% !important;
+  overflow-x: hidden !important;
+}
+
+/* Print-specific rules */
+@media print {
+  body {
+    background: #ffffff !important;
+  }
+  .paper-sheet {
+    width: 210mm;
+    min-height: 297mm;
+    margin: 30px auto;
+    padding: 25mm;
+    background: #ffffff;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+    page-break-after: always;
+}
+
+    margin: 0;
+    box-shadow: none;
+    page-break-after: always;
+  }
 }
 </style>
 </head>
@@ -307,13 +385,13 @@ hr.divider {
 <h2 class="section-title">2. Literature Review</h2>
 <p>Autonomous self-healing networks draw upon software-defined networking, causal inference, multi-metric optimization, and resilience modeling. We organize the literature into four technical categories.</p>
 <h3 class="subsection-title">2.1 SDN Restoration, Fast Rerouting, and Minimum-Change Routing</h3>
-<p>SDN architectures decouple control and data planes via protocols such as OpenFlow [5, 6]. Sharma et al. [7] conducted foundational studies contrasting proactive protection (pre-allocated backup paths) with reactive restoration (on-demand path computation). While protection achieves sub-50 ms failover, it rapidly exhausts switch flow tables. Recent work by Qin et al. [3] introduced FAPR, an adaptive flow-aware recovery framework balancing proactive backup selection with reactive restoration. Similarly, Yusuf et al. [4] formulated adaptive path selection using flow classification and composite QoS metrics. However, these works do not model the control-plane message cost incurred during large-scale reconfigurations.</p>
+<p>SDN architectures decouple control and data planes via protocols such as OpenFlow [5, 6]. Sharma et al. [7] conducted foundational studies contrasting proactive protection (pre-allocated backup paths) with reactive restoration (on-demand path computation). While protection achieves sub-50 ms failover, it rapidly exhausts switch flow tables. Recent work by Qin et al. [3] introduced FAPR, an adaptive flow-aware recovery framework balancing proactive backup selection with reactive restoration. Similarly, Yusuf et al. [4] formulated adaptive path selection using flow classification and composite QoS metrics. However, these works do not model the control-plane message cost incurred during large-scale reconfigurations. Li et al. [31] complemented this line of work by examining path selection for link-failure protection in hybrid SDNs; their analysis shows that selectively upgrading legacy routers to SDN switches minimises repair-path length and reduces transient congestion during single link-failure recovery.</p>
 <h3 class="subsection-title">2.2 Risk-Constrained Routing and Network Resilience Optimization</h3>
-<p>Risk-aware routing seeks to avoid links vulnerable to impending failure or buffer overflows [4, 6]. Chen et al. explored risk-aware traffic engineering in wide-area networks, incorporating probabilistic link availability into path optimization. Similarly, Zhang et al. surveyed fast and resilient rerouting mechanisms, highlighting the trade-off between path length optimality and transient instability. While these formulations model data-plane risk, they do not enforce hard post-recovery risk ceilings nor do they penalize the operational overhead of modifying forwarding entries in the control plane.</p>
+<p>Risk-aware routing seeks to avoid links vulnerable to impending failure or buffer overflows [4, 6]. Risk-aware traffic engineering aims to incorporate probabilistic link availability into path optimisation for wide-area SDN deployments [3, 4, 31]. Machine-learning methods for short-term traffic-flow prediction [32] have also been explored to anticipate emerging congestion and trigger proactive restoration before service disruption occurs. However, these formulations do not enforce hard post-recovery risk ceilings, nor do they penalise the operational overhead of modifying forwarding entries in the control plane.</p>
 <h3 class="subsection-title">2.3 Causal Fault Localization and Counterfactual Decision-Making</h3>
 <p>Causal inference, formalized by Pearl [9], distinguishes passive observational correlation $P(Y \mid X)$ from interventional manipulation $P(Y \mid do(X))$. In networking, causal directed graphs have been applied to root-cause fault localization [8, 9]. Wang et al. investigated causal inference for microservice and network failure diagnosis, showing that DAG-based traceback suppresses false positives caused by symptom propagation. However, existing causal approaches terminate at <em>fault localization</em>; they do not integrate counterfactual outcome prediction directly into an online <em>intervention optimization</em> algorithm that evaluates alternative recovery actions.</p>
 <h3 class="subsection-title">2.4 Autonomous Self-Healing, Network Digital Twins, and Safe Recovery Control</h3>
-<p>The concept of autonomous network management originated with Clark et al.'s "Knowledge Plane" [8]. Recent advances in Network Digital Twins (NDTs) [1, 6] provide virtualized environments for risk-free simulation of management decisions. Sanz Rodrigo et al. [1] produced high-fidelity digital twin datasets demonstrating zero-touch SLA preservation. Deep learning models have also been applied to anomaly detection and mitigation in SDNs [11, 15, 17, 27]. However, black-box learning policies lack formal safety guarantees. CIRAH bridges this gap by utilizing digital twin emulation to execute sound counterfactual what-if evaluations before committing physical control-plane interventions.</p>
+<p>The concept of autonomous network management originated with Clark et al.'s "Knowledge Plane" [8]. Recent advances in Network Digital Twins (NDTs) [1, 6] provide virtualized environments for risk-free simulation of management decisions. Sanz Rodrigo et al. [1] produced high-fidelity digital twin datasets demonstrating zero-touch SLA preservation. Deep learning models have also been applied to anomaly detection and DDoS mitigation in SDNs, encompassing systematic reviews [11], DNN-based classifiers [15, 21], optimised AI models [17, 18], hybrid and multi-class frameworks [12, 13, 20, 22, 24, 25, 26, 33, 34, 35], attention-driven representation learning [27, 30], IoT/IoMT-aware extensions [19, 29], and ensemble methods [14, 23]. However, black-box learning policies lack formal safety guarantees. CIRAH bridges this gap by utilizing digital twin emulation to execute sound counterfactual what-if evaluations before committing physical control-plane interventions.</p>
 <h3 class="subsection-title">2.5 Technical Comparison Table</h3>
 <p>Table 1 provides an objective comparison of CIRAH against representative state-of-the-art approaches across 8 key technical dimensions.</p>
 <p><strong>Table 1: Technical Comparison of Network Fault Recovery and Management Approaches</strong></p>
@@ -727,7 +805,7 @@ Output: Optimal Intervention Action a*
 <p>[28] R. Leena, S. Karamadi, and R. Manjesh, "Attack detection and network recovery using Correlation Aware Lotus Effect Hierarchical Dual Graph Neural Networks," <em>Computers and Electrical Engineering</em>, vol. 124, p. 110315, 2025. https://doi.org/10.1016/j.compeleceng.2025.110315.</p>
 <p>[29] Y. Rbah, M. Mahfoudi, M. Fattah, Y. Balboul, S. Mazer, M. El Bekkali, K. Chetioui, and B. Bernoussi, "Towards a hybrid deep-learning SDN-based intelligent attack detection system for the IoMT," <em>Int. J. Commun. Antenna Propag. IRECAP</em>, vol. 14, no. 1, 2024. https://doi.org/10.15866/irecap.v14i1.24493.</p>
 <p>[30] A. Alabrah, "An improved CCF detector to handle the problem of class imbalance with outlier normalisation using IQR method," <em>Sensors</em>, vol. 23, no. 9, p. 4406, 2023. https://doi.org/10.3390/s23094406.</p>
-<p>[31] S. Pei, H. Qin, L. Yao, Y. Liu, C. Wang, and J. Zhou, "Multi-step ahead short-term load forecasting using hybrid feature selection and improved long short-term memory network," <em>Energies</em>, vol. 13, no. 16, p. 4121, 2020. https://doi.org/10.3390/en13164121.</p>
+<p>[31] J. Li, X. Qi, W. Ma, and L. Liu, "Path selection for link failure protection in hybrid SDNs," <em>Future Generation Computer Systems</em>, vol. 137, pp. 201–215, 2022. https://doi.org/10.1016/j.future.2022.07.016.</p>
 <p>[32] S. Liu, W. Lin, Y. Wang, D. Z. Yu, Y. Peng, and X. Ma, "Convolutional neural network-based bidirectional gated recurrent unit–additive attention mechanism hybrid deep neural networks for short-term traffic flow prediction," <em>Sustainability</em>, vol. 16, no. 5, p. 1986, 2024. https://doi.org/10.3390/su16051986.</p>
 <p>[33] P. B. Arun Prasad, V. Mohan, and K. Vinoth Kumar, "Hybrid Metaheuristics with Deep Learning Enabled Cyberattack Prevention in Software Defined Networks," <em>Technical Gazette</em>, vol. 31, no. 1, 2024. https://doi.org/10.17559/TV-20230621000752.</p>
 <p>[34] S. Kavitha, N. Uma Maheswari, and R. Venkatesh, "Intelligent Intrusion Detection System using Enhanced Arithmetic Optimization Algorithm with Deep Learning Model," <em>Technical Gazette</em>, vol. 30, no. 4, 2023. https://doi.org/10.17559/TV-20221128071759.</p>
