@@ -4,273 +4,260 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>CIRAH: Minimum-Causal-Intervention Optimization for Risk-Constrained Autonomous Network Self-Healing</title>
-
-<!-- MathJax 3 for rendering publication-quality LaTeX equations -->
 <script>
 window.MathJax = {
   tex: {
-    inlineMath: [['$', '$'], ['\\(', '\\)']],
-    displayMath: [['$$', '$$'], ['\\[', '\\]']],
-    processEscapes: true
+    inlineMath: [['$','$'],['\\(','\\)']],
+    displayMath: [['$$','$$'],['\\[','\\]']],
+    processEscapes: true,
+    tags: 'ams'
   },
+  options: { skipHtmlTags: ['script','noscript','style','textarea','pre'] },
   svg: { fontCache: 'global' }
 };
 </script>
 <script type="text/javascript" id="MathJax-script" async
   src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
 </script>
-
 <style>
-/* Academic Publication Styling - Standard Elsevier / IEEE Format */
+/* ── Reset & base ────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+
 @page {
     size: A4;
-    margin: 25mm 20mm 20mm 20mm;
-    @bottom-center {
-        content: counter(page);
-        font-family: "Times New Roman", Times, serif;
-        font-size: 9pt;
-    }
+    margin: 22mm 18mm 20mm 18mm;
 }
 
-body {
-    font-family: "Times New Roman", Times, "Nimbus Roman No9 L", serif;
-    font-size: 10pt;
-    line-height: 1.42;
-    color: #111111;
-    background-color: #f0f2f5;
+html, body {
     margin: 0;
     padding: 0;
+    background: #eaecef;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 10pt;
+    color: #111;
+    line-height: 1.45;
 }
 
-/* Floating print button: visible in browser, completely hidden on paper print */
-.floating-print-btn {
+/* ── Paper sheet (visible in browser, transparent on print) ── */
+.page {
+    max-width: 800px;
+    margin: 28px auto 48px;
+    background: #fff;
+    padding: 54px 60px;
+    box-shadow: 0 2px 18px rgba(0,0,0,.10);
+}
+
+/* ── Print button ─────────────────────────────────────── */
+.print-btn {
     position: fixed;
-    top: 20px;
-    right: 25px;
-    z-index: 9999;
-    background-color: #003366;
-    color: #ffffff;
-    border: none;
-    padding: 10px 18px;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    bottom: 28px;
+    right: 28px;
+    background: #003366;
+    color: #fff;
+    font-family: system-ui, sans-serif;
     font-size: 13px;
-    font-weight: 600;
-    border-radius: 4px;
-    box-shadow: 0 4px 12px rgba(0,0,0,0.25);
+    font-weight: 700;
+    border: none;
+    border-radius: 6px;
+    padding: 11px 20px;
     cursor: pointer;
-    transition: background-color 0.2s ease;
+    box-shadow: 0 4px 14px rgba(0,0,40,.30);
+    z-index: 9999;
 }
-.floating-print-btn:hover {
-    background-color: #002244;
-}
+.print-btn:hover { background: #002255; }
 
-.paper-sheet {
-    max-width: 840px;
-    margin: 30px auto;
-    background: #ffffff;
-    padding: 60px 70px;
-    box-shadow: 0 2px 14px rgba(0,0,0,0.08);
-    box-sizing: border-box;
-}
-
-/* Title and Authors */
-.paper-title {
-    font-size: 18pt;
+/* ── Typography ───────────────────────────────────────── */
+.h-paper {
+    font-size: 17pt;
     font-weight: bold;
     text-align: center;
     line-height: 1.25;
-    margin-top: 0;
-    margin-bottom: 16px;
-    color: #0a192f;
+    margin: 0 0 14px;
+    color: #0a1628;
 }
-
-p:first-of-type {
-    text-align: center;
-    font-size: 10.5pt;
-    margin-bottom: 6px;
-}
-
-p:nth-of-type(2) {
-    text-align: center;
-    font-size: 9.5pt;
-    font-style: italic;
-    color: #333333;
-    margin-bottom: 24px;
-}
-
-/* Highlights Box */
-.section-title:first-of-type {
-    margin-top: 20px;
-}
-
-.section-title {
-    font-size: 12.5pt;
+.h-sec {
+    font-size: 12pt;
     font-weight: bold;
     color: #003366;
     border-bottom: 1px solid #003366;
-    padding-bottom: 3px;
-    margin-top: 28px;
-    margin-bottom: 10px;
+    padding-bottom: 2px;
+    margin: 26px 0 9px;
     page-break-after: avoid;
 }
-
-.subsection-title {
-    font-size: 11pt;
+.h-sub {
+    font-size: 10.5pt;
     font-weight: bold;
-    color: #1a202c;
-    margin-top: 18px;
-    margin-bottom: 6px;
+    margin: 16px 0 5px;
     page-break-after: avoid;
 }
-
-.subsubsection-title {
+.h-subsub {
     font-size: 10pt;
     font-weight: bold;
     font-style: italic;
-    color: #2d3748;
-    margin-top: 14px;
-    margin-bottom: 4px;
+    margin: 12px 0 4px;
     page-break-after: avoid;
 }
-
 p {
+    margin: 0 0 8px;
     text-align: justify;
-    text-justify: inter-word;
-    margin-top: 0;
-    margin-bottom: 9px;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+blockquote {
+    border-left: 3px solid #003366;
+    margin: 10px 0 10px 8px;
+    padding: 4px 12px;
+    font-style: italic;
+    color: #333;
+}
+ul, ol {
+    margin: 4px 0 8px 20px;
+    padding: 0;
+}
+li {
+    margin-bottom: 3px;
+    text-align: justify;
+    word-wrap: break-word;
+}
+strong { font-weight: bold; }
+em     { font-style: italic; }
+code   {
+    font-family: "Courier New", monospace;
+    font-size: 8.5pt;
+    background: #f4f6f9;
+    padding: 1px 3px;
+    border-radius: 2px;
+}
+hr {
+    border: none;
+    border-top: 0.5pt solid #bbb;
+    margin: 18px 0;
 }
 
-ul.academic-list, ol.academic-list {
-    margin-top: 4px;
-    margin-bottom: 10px;
-    padding-left: 24px;
-}
-ul.academic-list li, ol.academic-list li {
-    margin-bottom: 4px;
-    text-align: justify;
-}
-
-/* Academic Tables - Three Line Format */
-.table-container {
-    margin: 20px 0;
+/* ── Tables  — THE KEY FIX ───────────────────────────── */
+/*
+   Tables must fit within the column. Fixed layout + word-wrap.
+*/
+.tbl-wrap {
+    width: 100%;
+    margin: 16px 0;
     page-break-inside: avoid;
-    overflow-x: auto;
 }
-.academic-table {
+table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 9pt;
-    line-height: 1.3;
-    border-top: 1.5pt solid #111111;
-    border-bottom: 1.5pt solid #111111;
+    table-layout: fixed;          /* FIXED layout: columns share width evenly */
+    font-size: 8pt;
+    line-height: 1.30;
+    border-top: 1.5pt solid #111;
+    border-bottom: 1.5pt solid #111;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
-.academic-table th {
+th {
     font-weight: bold;
-    color: #111111;
-    padding: 6px 8px;
-    border-bottom: 1pt solid #111111;
+    padding: 5px 6px;
+    border-bottom: 1pt solid #111;
     text-align: left;
-    background-color: #fafafa;
+    background: #f7f8fa;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    vertical-align: top;
 }
-.academic-table td {
-    padding: 5px 8px;
-    border-bottom: 0.5pt solid #e2e8f0;
+td {
+    padding: 4px 6px;
+    border-bottom: 0.4pt solid #ddd;
+    vertical-align: top;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    hyphens: auto;
+}
+/* Wider tables: let the browser wrap freely */
+th, td {
+    white-space: normal !important;
 }
 
-/* Figures: In-line, bordered, centered */
-.figure-container {
+/* ── Figures ──────────────────────────────────────────── */
+figure.fig {
     text-align: center;
-    margin: 22px auto;
+    margin: 20px 0;
     page-break-inside: avoid;
 }
-.figure-container img {
-    border: 1px solid #dcdcdc;
-    border-radius: 2px;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.05);
+figure.fig img {
+    max-width: 100%;
+    height: auto;
+    border: 1px solid #ddd;
 }
-.figure-caption {
+figcaption {
     font-size: 8.5pt;
-    color: #333333;
+    color: #333;
     margin-top: 6px;
     line-height: 1.35;
-    padding: 0 15px;
+    padding: 0 10px;
 }
 
-/* Pre / Code Blocks */
+/* ── Code / Algorithm blocks ──────────────────────────── */
 pre {
-    background: #f8fafc;
-    border: 1px solid #e2e8f0;
-    border-left: 3px solid #003366;
-    padding: 10px 14px;
     font-family: "Courier New", Courier, monospace;
-    font-size: 8.5pt;
+    font-size: 7.8pt;
     line-height: 1.35;
-    overflow-x: auto;
+    background: #f8fafc;
+    border: 1px solid #dce1e8;
+    border-left: 3px solid #003366;
+    padding: 9px 12px;
+    margin: 12px 0;
     page-break-inside: avoid;
-    margin: 14px 0;
+    white-space: pre-wrap;       /* wrap long lines instead of scrolling */
+    word-wrap: break-word;
+    overflow-wrap: break-word;
 }
 
-hr.divider {
-    border: 0;
-    height: 0.5pt;
-    background: #ccc;
-    margin: 20px 0;
-}
-
-/* Print Media Rules */
+/* ── Print overrides ──────────────────────────────────── */
 @media print {
-    body {
-        background: #ffffff !important;
-        font-size: 9.5pt;
+    html, body { background: #fff; font-size: 9.5pt; }
+    .page {
+        max-width: 100%;
+        width: 100%;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
     }
-    .paper-sheet {
-        width: 100% !important;
-        max-width: 100% !important;
-        margin: 0 !important;
-        padding: 0 !important;
-        box-shadow: none !important;
-    }
-    .no-print, .floating-print-btn {
-        display: none !important;
-    }
-    .section-title, .subsection-title, .subsubsection-title {
-        page-break-after: avoid !important;
-    }
-    .figure-container, .table-container, pre {
-        page-break-inside: avoid !important;
-    }
+    .print-btn { display: none !important; }
+    .h-sec, .h-sub, .h-subsub { page-break-after: avoid; }
+    figure.fig, .tbl-wrap, pre { page-break-inside: avoid; }
+    a { color: #000; text-decoration: none; }
 }
 </style>
 </head>
 <body>
 
-<button class="floating-print-btn no-print" onclick="window.print()">🖨️ Save as PDF / Print</button>
+<button class="print-btn" onclick="window.print()">&#128438; Print / Save as PDF</button>
 
-<div class="paper-sheet">
-<h1 class="paper-title">CIRAH: Minimum-Causal-Intervention Optimization for Risk-Constrained Autonomous Network Self-Healing</h1>
+<div class="page">
+<h1 class="h-paper">CIRAH: Minimum-Causal-Intervention Optimization for Risk-Constrained Autonomous Network Self-Healing</h1>
 <p><strong>Buradagunta Shabreen Shaik, Rajisree Sadu, Pemmasani Greeshma</strong></p>
 <p><em>School of Computer Science and Engineering, VIT-AP University, Amaravati, Andhra Pradesh, 522237, India</em></p>
-<hr class='divider'/>
-<h2 class="section-title">Highlights</h2>
-<ul class="academic-list">
+<hr>
+<h2 class="h-sec">Highlights</h2>
+<ul>
 <li>Formulates a Structural Causal Model (SCM) connecting physical faults, queuing dynamics, routing interventions, and end-to-end SLA outcomes.</li>
 <li>Establishes a 3-state Bayesian fault localization model ($F_e \in \{0, 1, 2\}$) with normalized path evidence multipliers across all candidate states.</li>
 <li>Evaluates candidate actions prior to execution using Pearl's counterfactual $do(A=a)$ calculus with fixed exogenous background noise.</li>
 <li>Introduces the Causal Intervention Healing Field (CIHF) via normalized graph Laplacian heat diffusion to quantify spatial stress relief beyond local link utilization. Controlled experiments across 720 paired runs demonstrate that CIHF does not change the selected recovery action in 99.2% of tested scenarios; its contribution to the objective function is dominated by cost and risk terms. CIHF is retained as an interpretive stress-relief visualization rather than a decision-changing component.</li>
 <li>Formulates a normalized, risk-constrained optimization problem enforcing robust risk bounds ($R_{\text{post}} \le R_{\max}$) alongside a multi-tier safe fallback mechanism that detects physical network partitions.</li>
 <li>Validated through approximately 5,300 paired Monte Carlo simulation runs across Abilene (11 nodes), GEANT (22 nodes), and Fat-tree (20 nodes) backbones, showing statistically verified switch churn reductions ($13.8\%$ to $19.7\%$, $p < 0.01$) over dynamic shortest-path rerouting.</li>
-</ol>
-<hr class='divider'/>
-<h2 class="section-title">Abstract</h2>
+</ul>
+<hr>
+<h2 class="h-sec">Abstract</h2>
 <p>Modern software-defined communication networks are subject to unpredictable link outages, performance degradation, and cascading congestion that jeopardize strict service-level agreements (SLAs). Conventional self-healing techniques rely on reactive shortest-path recomputation or correlation-based heuristic rerouting; however, these approaches frequently trigger excessive switch reconfiguration churn, control-plane message storms, and secondary congestion cascades across un-intervened paths. This paper presents <strong>CIRAH</strong> (<strong>C</strong>ausal-<strong>I</strong>ntervention <strong>R</strong>isk-constrained <strong>A</strong>utonomous network self-<strong>H</strong>ealing), an optimization framework for autonomous network restoration. CIRAH establishes an explicit Structural Causal Model (SCM) connecting physical faults, link degradation, dynamic M/M/1 queuing delays, routing topology, and end-to-end service outcomes. Leveraging Pearl's counterfactual $do$-calculus, CIRAH estimates the consequence of candidate interventions prior to execution and models spatial stress relaxation via a continuous Causal Intervention Healing Field (CIHF) governed by normalized graph Laplacian heat diffusion. A constrained combinatorial optimizer selects the minimum-cost intervention set that satisfies robust post-recovery risk ceilings ($R_{\text{post}} \le R_{\max}$) and SLA recovery confidence thresholds ($\tau$), supported by an automated safe fallback mechanism that identifies physical network partitions. We evaluate CIRAH across realistic Abilene (11 nodes, 30 directed edges) and GEANT (22 nodes, 56 directed edges) topologies under diverse failure modes, including concurrent multi-link failures ($k=1$ to $4$), link capacity brownouts, bufferbloat delay spikes, and corrupted telemetry. Across paired Monte Carlo runs on the Abilene topology under double-link failures ($k=2$), CIRAH reduces the mean number of modified switches from 3.78 to 3.26 (a 13.8% reduction, $p = 0.00082$, paired Cohen's $d_z = -0.56$) and decreases mean control-plane intervention cost from 19.02 to 17.25 (a 9.3% reduction, $p = 0.00089$), while achieving an identical recovery success rate of 72.0% as reactive Dynamic-SP. Under single-link failures ($k=1$), switch modifications are reduced by 19.7% ($2.84 \to 2.28$, $p = 0.00206$). A dedicated 6-way ablation study demonstrates that omitting the hard risk constraint drops recovery success from 70.0% to 56.7% and elevates SLA violations to 43.3% with higher post-repair risk (8.57), while omitting the intervention cost penalty increases switch modification churn to 3.78 switches and removing the healing field reduces spatial stress dissipation gain to zero.</p>
 <p><strong>Keywords:</strong> Autonomous network self-healing, Structural Causal Models, Pearl's $do$-calculus, minimum-causal intervention, risk-constrained optimization, Software-Defined Networking (SDN).</p>
 <p><strong>Limitations:</strong> All results are from simulation on Abilene and GEANT topologies without physical SDN hardware validation. The Causal Intervention Healing Field (CIHF) is correctly implemented but does not influence candidate selection in 99.2% of tested scenarios; its contribution to the objective function is dominated by intervention cost and risk terms. Counterfactual evaluation changes action selection under tight capacity constraints but produces identical outcomes under the default wide-capacity scenarios tested in the ablation campaign.</p>
-<hr class='divider'/>
-<h2 class="section-title">1. Introduction</h2>
+<hr>
+<h2 class="h-sec">1. Introduction</h2>
 <p>Software-Defined Networking (SDN) centralizes control intelligence, granting network operators programmatic visibility and fine-grained forwarding control across distributed data-plane switches [1, 2]. Despite these architectural advantages, wide-area and data-center networks operate under intense dynamic volatility, where physical fiber cuts, optical transponder brownouts, hardware failures, and bursty traffic surges trigger severe service degradation [3, 4]. When outages occur, the network management system must autonomously detect the fault, diagnose the underlying cause, compute a remedial configuration, and verify service restoration with minimal downtime [5, 6].</p>
-<h3 class="subsection-title">1.1 Limitations of Existing Approaches</h3>
+<h3 class="h-sub">1.1 Limitations of Existing Approaches</h3>
 <p>While autonomous recovery has been widely explored, existing paradigms exhibit distinct operational limitations:</p>
-<ol class="academic-list">
+<ol>
 <li><strong>Reactive Shortest-Path Rerouting:</strong> Conventional controllers (e.g., Dijkstra-based dynamic shortest path) react to link outages by recomputing shortest paths over remaining active links [7, 10]. Although connectivity is restored, this greedy approach ignores the operational churn imposed on the control plane, frequently modifying extensive sets of switches and creating transient forwarding loops and packet reordering [11].</li>
 <li><strong>Precomputed Protection Paths (Fast Reroute):</strong> Pre-provisioned backup paths offer sub-50 ms restoration [3, 7]. However, maintaining pre-installed protection rules in switch Ternary Content-Addressable Memory (TCAM) incurs high resource overhead. Furthermore, backup paths precomputed for isolated single-link failures fail under concurrent multi-link failures or correlated stress.</li>
 <li><strong>Risk-Aware Routing:</strong> Multi-metric and risk-aware routing algorithms penalize high-risk or congested links [4, 6]. Nevertheless, existing formulations optimize purely data-plane path metrics without penalizing the <em>operational cost of intervention</em> (the quantity of rule updates and switch modifications), leading to widespread route flapping.</li>
@@ -278,47 +265,47 @@ hr.divider {
 <li><strong>Correlation-Based vs. Causal Diagnosis:</strong> Most fault localization tools rely on statistical correlations or rule-based heuristics [10, 14, 27]. Correlation does not distinguish between root causes and downstream symptoms (e.g., whether link degradation causes queue build-up or upstream congestion causes apparent packet drop). Consequently, rule-based systems often treat downstream symptoms with excessive, misdirected interventions.</li>
 <li><strong>Absence of Unified Counterfactual Evaluation:</strong> Existing network management systems lack the capability to evaluate <em>counterfactual queries</em>—formally evaluating <em>"What would the post-recovery network latency and risk distribution be if action $a$ were executed, compared to baseline $a_0$?"</em> [8, 9].</li>
 </ol>
-<h3 class="subsection-title">1.2 Formulated Research Gap</h3>
+<h3 class="h-sub">1.2 Formulated Research Gap</h3>
 <p>Although prior network-recovery approaches address fault diagnosis, path restoration, and risk-aware routing, the extent to which causal uncertainty, intervention-induced congestion, and control-plane reconfiguration costs can be jointly incorporated into a risk-constrained recovery decision remains to be established. This work investigates a unified intervention-selection formulation and evaluates the independent contribution of its causal prediction, graph-based stress-relief, and risk-control components under controlled network failure scenarios.</p>
 <p>Specifically, we frame this investigation around the central research question:</p>
-<p>> <em>Can a network self-healing controller select a feasible recovery action that maintains service, satisfies an explicit post-recovery risk limit, and minimizes operational intervention cost while accounting for uncertainty in fault diagnosis and predicted recovery outcomes?</em></p>
-<h3 class="subsection-title">1.3 Research Questions and Hypotheses</h3>
-<ul class="academic-list">
+<blockquote><em>Can a network self-healing controller select a feasible recovery action that maintains service, satisfies an explicit post-recovery risk limit, and minimizes operational intervention cost while accounting for uncertainty in fault diagnosis and predicted recovery outcomes?</em></blockquote>
+<h3 class="h-sub">1.3 Research Questions and Hypotheses</h3>
+<ul>
 <li><strong>RQ1:</strong> Does causal and counterfactual action evaluation improve recovery decisions compared with rule-based or correlation-based diagnosis under noisy telemetry?</li>
 <li><strong>RQ2:</strong> Can CIRAH reduce operational intervention cost and switch churn while preserving connectivity and meeting service-level requirements?</li>
 <li><strong>RQ3:</strong> Does CIRAH maintain its effectiveness and risk compliance under multiple simultaneous faults and high traffic load?</li>
 <li><strong>RQ4:</strong> What quantitative trade-offs exist between intervention cost, recovery latency, packet loss, and residual risk across the algorithmic components?</li>
-</ol>
+</ul>
 <p>We formulate four testable hypotheses:</p>
-<ul class="academic-list">
+<ul>
 <li><strong>H1 (Intervention Parsimony):</strong> CIRAH achieves a statistically significant reduction in switch modifications and control-plane intervention cost compared to reactive Dynamic-SP during link failure recovery ($p < 0.05$).</li>
 <li><strong>H2 (Risk Compliance):</strong> CIRAH maintains post-recovery risk strictly beneath the prescribed threshold $R_{\max}$, whereas unconstrained optimization variants exhibit elevated risk violations.</li>
 <li><strong>H3 (Noise Resilience):</strong> Under high telemetry observation uncertainty ($\sigma_{\text{noise}} \ge 0.20$), causal Bayesian fault estimation maintains a higher recovery success rate than heuristic rule-based diagnosis.</li>
 <li><strong>H4 (Scalability across Topologies):</strong> The parsimonious intervention advantage of CIRAH persists across both small backbones (Abilene, 11 nodes) and larger meshed networks (GEANT, 22 nodes).</li>
-</ol>
-<h3 class="subsection-title">1.4 Revised Technical Contributions</h3>
-<ol class="academic-list">
+</ul>
+<h3 class="h-sub">1.4 Revised Technical Contributions</h3>
+<ol>
 <li><strong>Causal fault-to-recovery formulation:</strong> A formally specified structural causal model connecting link faults, traffic conditions, M/M/1 queuing behavior, routing interventions, and end-to-end service outcomes. Its assumptions, identifiability limitations, and predictive accuracy are explicitly evaluated.</li>
 <li><strong>Intervention-aware recovery optimization:</strong> A constrained recovery formulation that jointly accounts for control-plane reconfiguration cost, service disruption, residual network risk, and SLA feasibility. Its solution quality is compared with established constrained routing methods.</li>
 <li><strong>Network-wide intervention impact estimation:</strong> A graph-based stress-relief mechanism (CIHF) whose contribution is evaluated against conventional graph diffusion, direct congestion metrics, and alternative graph-based scoring methods. Controlled experiments demonstrate that CIHF does not change action selection under tested conditions; it is retained as an interpretive visualization of spatial stress relief.</li>
 <li><strong>Uncertainty-aware risk handling:</strong> A clearly defined method for evaluating risk under uncertain telemetry and counterfactual predictions, with robust risk bounds and empirical constraint-violation measurements.</li>
 <li><strong>Reproducible experimental validation:</strong> A systematic evaluation across failure severity, telemetry uncertainty, traffic variation, and network topology, including independently verified 6-way ablations, paired statistical comparisons ($N=50$ to $60$ runs per condition), and open-source implementation details.</li>
 </ol>
-<hr class='divider'/>
-<h2 class="section-title">2. Literature Review</h2>
+<hr>
+<h2 class="h-sec">2. Literature Review</h2>
 <p>Autonomous self-healing networks draw upon software-defined networking, causal inference, multi-metric optimization, and resilience modeling. We organize the literature into four technical categories.</p>
-<h3 class="subsection-title">2.1 SDN Restoration, Fast Rerouting, and Minimum-Change Routing</h3>
+<h3 class="h-sub">2.1 SDN Restoration, Fast Rerouting, and Minimum-Change Routing</h3>
 <p>SDN architectures decouple control and data planes via protocols such as OpenFlow [5, 6]. Sharma et al. [7] conducted foundational studies contrasting proactive protection (pre-allocated backup paths) with reactive restoration (on-demand path computation). While protection achieves sub-50 ms failover, it rapidly exhausts switch flow tables. Recent work by Qin et al. [3] introduced FAPR, an adaptive flow-aware recovery framework balancing proactive backup selection with reactive restoration. Similarly, Yusuf et al. [4] formulated adaptive path selection using flow classification and composite QoS metrics. However, these works do not model the control-plane message cost incurred during large-scale reconfigurations. Li et al. [31] complemented this line of work by examining path selection for link-failure protection in hybrid SDNs; their analysis shows that selectively upgrading legacy routers to SDN switches minimises repair-path length and reduces transient congestion during single link-failure recovery.</p>
-<h3 class="subsection-title">2.2 Risk-Constrained Routing and Network Resilience Optimization</h3>
+<h3 class="h-sub">2.2 Risk-Constrained Routing and Network Resilience Optimization</h3>
 <p>Risk-aware routing seeks to avoid links vulnerable to impending failure or buffer overflows [4, 6]. Risk-aware traffic engineering aims to incorporate probabilistic link availability into path optimisation for wide-area SDN deployments [3, 4, 31]. Machine-learning methods for short-term traffic-flow prediction [32] have also been explored to anticipate emerging congestion and trigger proactive restoration before service disruption occurs. However, these formulations do not enforce hard post-recovery risk ceilings, nor do they penalise the operational overhead of modifying forwarding entries in the control plane.</p>
-<h3 class="subsection-title">2.3 Causal Fault Localization and Counterfactual Decision-Making</h3>
+<h3 class="h-sub">2.3 Causal Fault Localization and Counterfactual Decision-Making</h3>
 <p>Causal inference, formalized by Pearl [9], distinguishes passive observational correlation $P(Y \mid X)$ from interventional manipulation $P(Y \mid do(X))$. In networking, causal directed graphs have been applied to root-cause fault localization [8, 9]. Wang et al. investigated causal inference for microservice and network failure diagnosis, showing that DAG-based traceback suppresses false positives caused by symptom propagation. However, existing causal approaches terminate at <em>fault localization</em>; they do not integrate counterfactual outcome prediction directly into an online <em>intervention optimization</em> algorithm that evaluates alternative recovery actions.</p>
-<h3 class="subsection-title">2.4 Autonomous Self-Healing, Network Digital Twins, and Safe Recovery Control</h3>
+<h3 class="h-sub">2.4 Autonomous Self-Healing, Network Digital Twins, and Safe Recovery Control</h3>
 <p>The concept of autonomous network management originated with Clark et al.'s "Knowledge Plane" [8]. Recent advances in Network Digital Twins (NDTs) [1, 6] provide virtualized environments for risk-free simulation of management decisions. Sanz Rodrigo et al. [1] produced high-fidelity digital twin datasets demonstrating zero-touch SLA preservation. Deep learning models have also been applied to anomaly detection and DDoS mitigation in SDNs, encompassing systematic reviews [11], DNN-based classifiers [15, 21], optimised AI models [17, 18], hybrid and multi-class frameworks [12, 13, 20, 22, 24, 25, 26, 33, 34, 35], attention-driven representation learning [27, 30], IoT/IoMT-aware extensions [19, 29], and ensemble methods [14, 23]. However, black-box learning policies lack formal safety guarantees. CIRAH bridges this gap by utilizing digital twin emulation to execute sound counterfactual what-if evaluations before committing physical control-plane interventions.</p>
-<h3 class="subsection-title">2.5 Technical Comparison Table</h3>
+<h3 class="h-sub">2.5 Technical Comparison Table</h3>
 <p>Table 1 provides an objective comparison of CIRAH against representative state-of-the-art approaches across 8 key technical dimensions.</p>
 <p><strong>Table 1: Technical Comparison of Network Fault Recovery and Management Approaches</strong></p>
-<div class="table-container"><table class="academic-table">
+<div class="tbl-wrap"><table>
 <tr><th>Approach</th><th>Causal Diagnosis</th><th>Counterfactual Prediction</th><th>Intervention Cost</th><th>Risk Treatment</th><th>Network-Wide Effects</th><th>Uncertainty Handling</th><th>Guarantees</th><th>Validation Environment</th></tr>
 <tr><td><strong>FAPR [3]</strong></td><td>No (Heartbeat)</td><td>No</td><td>Resource proxy</td><td>None</td><td>Local link only</td><td>Deterministic</td><td>None</td><td>Mininet Emulation</td></tr>
 <tr><td><strong>Yusuf et al. [4]</strong></td><td>No (Threshold)</td><td>No</td><td>None</td><td>None</td><td>Path-level composite</td><td>None</td><td>None</td><td>Simulation</td></tr>
@@ -333,35 +320,29 @@ hr.divider {
 <tr><td><strong>Constrained-MinChange</strong></td><td>Link-down alert</td><td>No</td><td>Switch diff count</td><td>Hard Bound ($R_{\text{post}} \le R_{\max}$)</td><td>Local link status</td><td>None</td><td>Risk Feasibility</td><td>Simulation</td></tr>
 <tr><td><strong>CIRAH (Proposed)</strong></td><td><strong>Bayesian SCM</strong></td><td><strong>Pearl's $do(A)$</strong></td><td><strong>Fine-grained ($C_I, C_D$)</strong></td><td><strong>Hard Bound ($R_{\text{post}} \le R_{\max}$)</strong></td><td><strong>Laplacian Diffusion (CIHF)</strong></td><td><strong>3-State Bayesian + Noise</strong></td><td><strong>Robust Risk Bound</strong></td><td><strong>Abilene, GEANT & Fat-tree Topologies</strong></td></tr>
 </table></div>
-<hr class='divider'/>
-<h2 class="section-title">3. Proposed Methodology: The CIRAH Framework</h2>
-<h3 class="subsection-title">3.1 End-to-End System Architecture</h3>
+<hr>
+<h2 class="h-sec">3. Proposed Methodology: The CIRAH Framework</h2>
+<h3 class="h-sub">3.1 End-to-End System Architecture</h3>
+<figure class="fig" id="fig1"><img src="../figures/fig1_academic_architecture.png" alt="Figure 1. CIRAH three-tier architecture: Tier 1 (Telemetry & Observation), Tier 2 (Cognitive Causal Optimization), Tier 3 (Digital Twin Adaptation)." style="max-width:98%;"><figcaption>Figure 1. CIRAH three-tier architecture: Tier 1 (Telemetry & Observation), Tier 2 (Cognitive Causal Optimization), Tier 3 (Digital Twin Adaptation).</figcaption></figure>
 
-    <div class="figure-container" id="fig1">
-        <img src="../figures/fig1_academic_architecture.png" alt="Figure 1. Architectural blueprint of the CIRAH framework showing the 3 operational tiers: Telemetry & Observation (Tier 1), Cognitive Causal Optimization Substrate (Tier 2), and Digital Twin Closed-Loop Adaptation (Tier 3)." style="max-width:98%;">
-        <div class="figure-caption"><strong>Figure 1.</strong>  Architectural blueprint of the CIRAH framework showing the 3 operational tiers: Telemetry & Observation (Tier 1), Cognitive Causal Optimization Substrate (Tier 2), and Digital Twin Closed-Loop Adaptation (Tier 3).</div>
-    </div>
-    
 <p>The CIRAH architecture comprises three functional tiers organized into a closed-loop control system:</p>
-<ol class="academic-list">
+<ol>
 <li><strong>Tier 1 (Telemetry & Observation):</strong> Continuous monitoring of link latency, loss, flow rates, and switch port statistics, feeding anomaly detection and data-plane OpenFlow actuation.</li>
 <li><strong>Tier 2 (Cognitive Causal Optimization Substrate):</strong> Structural Causal Model (SCM) Bayesian traceback, Pearl counterfactual intervention evaluation, Causal Intervention Healing Field (CIHF) diffusion, and the risk-constrained minimum-intervention solver.</li>
 <li><strong>Tier 3 (Network Digital Twin & Adaptation):</strong> Virtual state emulation for risk-free what-if counterfactual validation and continuous Bayesian model adaptation.</li>
 </ol>
-<h3 class="subsection-title">3.2 Formal Structural Causal Model (SCM)</h3>
+<h3 class="h-sub">3.2 Formal Structural Causal Model (SCM)</h3>
 <p>We define the network state using a 6-tuple SCM: $\mathcal{M} = \langle \mathcal{U}, \mathcal{V}, \mathcal{F}, P(\mathcal{U}) \rangle$, where:</p>
-<ul class="academic-list">
+<ul>
 <li><strong>Exogenous Variables $\mathcal{U}$:</strong> Background physical noise and traffic jitter: $\mathcal{U} = \{U_{\text{loss}}, U_{\text{lat}}\}$.</li>
 <li><strong>Endogenous Variables $\mathcal{V}$:</strong></li>
 <li>$F_e \in \{0, 1, 2\}$: Discrete fault state of link $e=(u, v)$ (0: Normal, 1: Degraded, 2: Severed).</li>
 <li>$L_e = \langle \text{lat}_e, \text{loss}_e, \text{cap}_e \rangle$: Physical link properties.</li>
 <li>$Q_e \in [0, 1]$: Dynamic queue utilization driven by traffic assignment $R$.</li>
-<div class="table-container"><table class="academic-table">
-<tr><td>* $R \in \mathbb{R}^{</td><td>\mathcal{F}</td><td>\times</td><td>\mathcal{E}</td><td>}$: Active routing configuration matrix mapping flows $\mathcal{F}$ across links $\mathcal{E}$.</td></tr>
-</table></div>
+<li>$R \in \mathbb{R}^{|\mathcal{F}| \times |\mathcal{E}|}$: Active routing configuration matrix mapping flows $\mathcal{F}$ across links $\mathcal{E}$.</li>
 <li>$Y_f = \langle \text{lat}_f, \text{loss}_f, \text{conn}_f \rangle$: End-to-end service outcomes for flow $f$.</li>
 <li>$A$: Candidate intervention operator $do(A=a)$.</li>
-</ol>
+</ul>
 <p>The structural equations governing link state and queuing dynamics are:</p>
 <p>$$L_e = f_L(F_e, U_{L, e}) = \begin{cases}</p>
 <p>\langle \text{lat}_0, 0, \text{cap}_0 \rangle + U_{L, e}, & \text{if } F_e = 0 \\</p>
@@ -375,7 +356,7 @@ hr.divider {
 <p>15.0 + 35.0 \cdot \left(\frac{Q_e - 0.85}{0.15}\right)^{1.5}, & \text{if } 0.85 \le Q_e \le 1.0 \\</p>
 <p>50.0 + (Q_e - 1.0) \cdot 80.0, & \text{if } Q_e > 1.0</p>
 <p>\end{cases} \tag{3}$$</p>
-<h4 class="subsubsection-title">Validated Bayesian Causal Fault Localization</h4>
+<h4 class="h-subsub">Validated Bayesian Causal Fault Localization</h4>
 <p>Given noisy telemetry observations $\mathcal{O}_e = \langle \widehat{\text{lat}}_e, \widehat{\text{loss}}_e, \text{status}_e \rangle$ and the set of active paths traversing $e$, the unnormalized posterior score for state $k \in \{0, 1, 2\}$ is:</p>
 <p>$$s_k(e) = P(\mathcal{O}_e \mid F_e = k) \cdot P(F_e = k) \cdot w_k(\text{Paths}) \tag{4a}$$</p>
 <p>where $P(F_e = 0) = 0.95$, $P(F_e = 1) = 0.03$, and $P(F_e = 2) = 0.02$. The path evidence multipliers are defined across all three states as:</p>
@@ -384,46 +365,42 @@ hr.divider {
 <p>$$P(F_e = k \mid \mathcal{O}_e, \text{Paths}) = \frac{s_k(e)}{\sum_{j \in \{0, 1, 2\}} s_j(e)} \tag{4c}$$</p>
 <p>ensuring $\sum_{k=0}^2 P(F_e = k \mid \mathcal{O}_e, \text{Paths}) = 1.0$.</p>
 <p><strong>Prior Justification:</strong> The priors $P(F_e=0)=0.95$, $P(F_e=1)=0.03$, $P(F_e=2)=0.02$ reflect conservative operational base rates: network links are available $\approx$99.8\% of the time in typical ISP backbones, with rare degradation and very rare complete severance. These priors are intentionally conservative to avoid false-positive fault declarations in healthy networks. The likelihood functions are piecewise-defined based on observable thresholds: status=0 or loss≥95\% classifies as severed; loss>3\% or latency ratio>1.4 classifies as degraded; otherwise normal. The path evidence multipliers $w_k$ are calibrated so that a link traversed only by impaired flows (ρ_e→1) shifts probability toward severed and degraded states, while a link with no traversing impaired flows (ρ_e=0) reduces the degraded-state probability.</p>
-<p><strong>Fault Localization Evaluation:</strong> Empirical precision/recall/F1 were measured across $N=100$ fault scenarios (k=1,2,3 cycling, 3,000 edge evaluations total) using ground-truth fault states from the fault generator. Results: Normal state: Precision=1.000, Recall=1.000, F1=1.000; Severed state: Precision=1.000, Recall=1.000, F1=1.000; Overall accuracy=1.000. The degraded state evaluation yielded Precision=0.000, Recall=0.000, F1=0.000 because the fault generator (`inject_multi_link_failure`) does not inject degraded links — only complete severances — meaning no degraded ground-truth cases existed in this evaluation. This result reveals that the degraded-state classification has not been evaluated against true degraded links; this limitation is acknowledged in Section 8.</p>
+<p><strong>Fault Localization Evaluation:</strong> Empirical precision/recall/F1 were measured across $N=100$ fault scenarios (k=1,2,3 cycling, 3,000 edge evaluations total) using ground-truth fault states from the fault generator. Results: Normal state: Precision=1.000, Recall=1.000, F1=1.000; Severed state: Precision=1.000, Recall=1.000, F1=1.000; Overall accuracy=1.000. The degraded state evaluation yielded Precision=0.000, Recall=0.000, F1=0.000 because the fault generator (<code>inject_multi_link_failure</code>) does not inject degraded links — only complete severances — meaning no degraded ground-truth cases existed in this evaluation. This result reveals that the degraded-state classification has not been evaluated against true degraded links; this limitation is acknowledged in Section 8.</p>
 <p><strong>SCM Causal Assumptions and Identifiability:</strong> The causal DAG for CIRAH assumes: (1) $F_e \to L_e$ (fault state determines link properties); (2) $L_e, R \to Q_e$ (link state and routing determine queue depth); (3) $Q_e \to Y_f$ (queue depth determines service outcomes); (4) $A \to R$ (intervention modifies routing). There are no hidden common causes assumed between fault states of independent links. The key identifiability assumption is that the exogenous noise $U = (U_{\text{lat}}, U_{\text{loss}})$ is point-estimated from the residual between observed and nominal telemetry via abduction (Step 1 of counterfactual evaluation). This is a deterministic point-estimate, not a distributional inference; distributional uncertainty in $U$ is not propagated through the counterfactual prediction, which is an acknowledged limitation. The model is not calibrated against a physical testbed; it is calibrated against the simulator's own structural equations, meaning accurate predictions reflect internal consistency, not external validity.</p>
-<h3 class="subsection-title">3.3 Counterfactual Intervention Evaluation Engine ($do(A=a)$)</h3>
+<h3 class="h-sub">3.3 Counterfactual Intervention Evaluation Engine ($do(A=a)$)</h3>
 <p>To evaluate the true causal consequence of an action $a$ without confounding from passive correlations, CIRAH executes Pearl's 3-step counterfactual algorithm:</p>
-<ol class="academic-list">
+<ol>
 <li><strong>Abduction:</strong> The controller inverts the structural equations to estimate the latent background noise vector $\widehat{\mathcal{U}}$ given factual telemetry $\mathcal{O}$:</li>
 </ol>
 <p>   $$\widehat{U}_{\text{lat}, e} = \max(0.0, \mathcal{O}_{\text{lat}, e} - \text{base\_lat}_e), \quad \widehat{U}_{\text{loss}, e} = \max(0.0, \mathcal{O}_{\text{loss}, e})$$</p>
-<ol class="academic-list">
+<ol>
 <li><strong>Action:</strong> The SCM is modified by replacing the structural equation for routing variable $R_{f^<em>}$ with the interventional assignment $do(A = a)$, formally severing all incoming causal arrows into $R_{f^</em>}$:</li>
 </ol>
 <p>   $$\mathcal{M}_{do(A=a)} \implies R_{f^*} \leftarrow \text{Path}(a) \tag{5}$$</p>
-<ol class="academic-list">
+<ol>
 <li><strong>Prediction:</strong> Forward-propagating traffic demands with fixed $\widehat{\mathcal{U}}$ computes counterfactual loads $\widehat{\text{Load}}_e(a)$, queue delays $\widehat{D}_{\text{queue}, e}(a)$, and end-to-end service outcomes:</li>
 </ol>
 <p>   $$\widehat{\text{Loss}}_e(a) = 1.0 - \left(1.0 - \frac{\text{loss}_{\text{raw}, e}}{100}\right) \cdot \left(1.0 - \frac{\text{Drop}_{\text{queue}}(\widehat{Q}_e(a))}{100}\right) \tag{6}$$</p>
 <p>The counterfactual recovery probability is formally:</p>
-<div class="table-container"><table class="academic-table">
-<tr><td>$$P(F_{\text{recovered}} \mid do(A=a)) = \mathbb{E}\left[ \mathbb{I}\left( \widehat{\text{lat}}_{f^<em>}(a) \le \text{SLA}_{\text{lat}} \;\land\; \widehat{\text{loss}}_{f^</em>}(a) \le \text{SLA}_{\text{loss}} \right) \,\Bigg</td><td>\, \mathcal{O} \right] \tag{7}$$</td></tr>
-</table></div>
-<h3 class="subsection-title">3.4 Causal Intervention Healing Field (CIHF)</h3>
+<p>$$P(F_{\text{recovered}} \mid do(A=a)) = \mathbb{E}\left[ \mathbb{I}\left( \widehat{\text{lat}}_{f^<em>}(a) \le \text{SLA}_{\text{lat}} \;\land\; \widehat{\text{loss}}_{f^</em>}(a) \le \text{SLA}_{\text{loss}} \right) \,\Bigg|\, \mathcal{O} \right] \tag{7}$$</p>
+<h3 class="h-sub">3.4 Causal Intervention Healing Field (CIHF)</h3>
 <p>When an intervention modifies flow paths, it alters traffic equilibrium across the graph. We formulate the <strong>Healing Field</strong> $H(a, v)$ as a continuous spectral potential field governed by the normalized graph Laplacian $\mathbf{L}_{\text{norm}} = \mathbf{I} - \mathbf{D}^{-1/2} \mathbf{W} \mathbf{D}^{-1/2}$, where $W_{ij} = 1/\max(1, \text{lat}_{ij})$.</p>
 <p>The steady-state diffusion equation over network topology $\mathcal{G} = (\mathcal{V}, \mathcal{E})$ is:</p>
 <p>$$(\mathbf{I} + \sigma \mathbf{L}_{\text{norm}}) \mathbf{h}(a) = \mathbf{s}(a) \implies \mathbf{h}(a) = (\mathbf{I} + \sigma \mathbf{L}_{\text{norm}})^{-1} \mathbf{s}(a) \tag{8}$$</p>
-<div class="table-container"><table class="academic-table">
-<tr><td>where $\mathbf{s}(a) \in [0, 1]^{</td><td>\mathcal{V}</td><td>}$ is the normalized spatial intervention impulse vector:</td></tr>
-</table></div>
+<p>where $\mathbf{s}(a) \in [0, 1]^{|\mathcal{V}|}$ is the normalized spatial intervention impulse vector:</p>
 <p>$$s_v(a) = \min\left(1.0, \frac{\max(0, \text{Stress}_{\text{pre}}(v) - \widehat{\text{Stress}}_{\text{post}}(v \mid do(a)))}{100.0}\right) \cdot w_{\text{action}}(v) \tag{9}$$</p>
 <p>The scalar aggregate healing benefit is:</p>
 <p>$$\Psi(a) = \sum_{v \in \mathcal{V}} H(a, v) = \mathbf{1}^T \mathbf{h}(a) \tag{10}$$</p>
 <p>The normalized Laplacian ensures that high-degree hub switches do not artificially dominate the field, while $\sigma = 1.5$ defines the spatial decay radius across 2–3 topological hops.</p>
-<h3 class="subsection-title">3.5 Risk Assessment Module & Robust Constraints</h3>
+<h3 class="h-sub">3.5 Risk Assessment Module & Robust Constraints</h3>
 <p>The residual risk $R_{\text{post}}(a)$ decomposes into operational and propagation risks:</p>
 <p>$$R_{\text{post}}(a) = R_{\text{op}}(a) + R_{\text{prop}}(a) \tag{11}$$</p>
 <p>where:</p>
-<ul class="academic-list">
+<ul>
 <li><strong>Operational Risk ($R_{\text{op}}$):</strong> Immediate service disruption and reconfiguration hazards:</li>
 </ul>
 <p>  $$R_{\text{op}}(a) = P_{\text{disconnect}}(a) \cdot 100.0 + P_{\text{SLA}}(a) \cdot 25.0 + P_{\text{flap}}(a) \cdot 15.0 \tag{12}$$</p>
-<ul class="academic-list">
+<ul>
 <li><strong>Propagation Risk ($R_{\text{prop}}$):</strong> Risk of triggering secondary cascading congestion on adjacent un-intervened links:</li>
 </ul>
 <p>  $$R_{\text{prop}}(a) = \sum_{e \in \mathcal{E}} \mathbb{I}(\text{util}_e(a) > 0.85) \cdot \left[1.0 - \exp\left(-1.8 \cdot \frac{\text{util}_e(a) - 0.85}{0.15}\right)\right] \cdot 40.0 \tag{13}$$</p>
@@ -431,22 +408,22 @@ hr.divider {
 <p>$$R_{\text{robust}}(a) = R_{\text{post}}(a) + z_{\alpha} \cdot \sigma_R(a) \le R_{\max} \tag{14}$$</p>
 <p>where $z_{\alpha} = 1.645$ corresponds to a 95% one-sided confidence quantile and $\sigma_R(a) = 0.08 \cdot R_{\text{post}}(a)$.</p>
 <p><strong>Justification and Assumptions:</strong> The confidence quantile $z_\alpha = 1.645$ corresponds to the one-sided 95% bound under a Gaussian approximation to estimation error. The uncertainty model $\sigma_R = 0.08 \cdot R_{\text{post}}$ assumes risk estimation error scales proportionally with the estimated risk level; this is a modeling choice, not an empirically calibrated variance. This constraint provides a 95% one-sided bound on the <em>estimated mean risk</em> under the assumed noise model, not a guarantee on individual recovery outcomes — a specific recovery action may have actual post-recovery risk exceeding $R_{\max}$ if the estimation error exceeds the 8% budget. The constraint is valid under the assumption that risk estimation errors are approximately Gaussian and independent. Empirical validation on $N=30$ independent test scenarios at $R_{\max} = 35.0$ confirms a 0.0% observed constraint violation rate; risk threshold sensitivity is evaluated in Section 5.6.</p>
-<h3 class="subsection-title">3.6 Multi-Dimensional Intervention Cost Model</h3>
+<h3 class="h-sub">3.6 Multi-Dimensional Intervention Cost Model</h3>
 <p>CIRAH models control-plane overhead using normalized operational units:</p>
-<ul class="academic-list">
+<ul>
 <li><strong>Direct Control-Plane Cost ($C_I$):</strong></li>
 </ul>
 <p>  $$C_I(a) = w_{\text{rule}} \Delta \text{Rules}(a) + w_{\text{sw}} \Delta \text{Switches}(a) + w_{\text{msg}} \text{Msg}_{\text{ctrl}}(a) \tag{15}$$</p>
 <p>  with weights $w_{\text{rule}} = 1.0$, $w_{\text{sw}} = 2.5$, $w_{\text{msg}} = 0.5$.</p>
-<ul class="academic-list">
+<ul>
 <li><strong>Transient Disruption Cost ($C_D$):</strong> Service penalty during TCAM rule commit windows ($\Delta t_{\text{commit}} = 12\text{ ms per switch}$):</li>
 </ul>
 <p>  $$C_D(a) = \left( \frac{\Delta \text{Switches}(a) \cdot 12\text{ ms}}{1000} \right) \cdot d_f \cdot 5.0 \tag{16}$$</p>
-<ul class="academic-list">
+<ul>
 <li><strong>Latency SLA Excess ($C_L$):</strong></li>
 </ul>
 <p>  $$C_L(a) = \max\left(0, \widehat{\text{lat}}(a) - \text{SLA}_{\text{lat}}\right) \tag{17}$$</p>
-<h3 class="subsection-title">3.7 Normalized Combinatorial Optimization Problem</h3>
+<h3 class="h-sub">3.7 Normalized Combinatorial Optimization Problem</h3>
 <p>The optimal intervention $a^*$ is obtained by solving:</p>
 <p>$$\min_{a \in \mathcal{A}_{\text{feas}}} \;\; \mathcal{J}(a) = \lambda_I \frac{C_I(a)}{C_{I, \text{ref}}} + \lambda_D \frac{C_D(a)}{C_{D, \text{ref}}} + \lambda_L \frac{C_L(a)}{C_{L, \text{ref}}} + \beta \frac{R_{\text{post}}(a)}{R_{\max}} - \gamma \frac{\Psi(a)}{\Psi_{\text{ref}}} \tag{18}$$</p>
 <p>$$\text{subject to: } \begin{cases}</p>
@@ -456,17 +433,15 @@ hr.divider {
 <p>\text{util}_e(a) \le 1.0, \quad \forall e \in \text{Path}(a) & \text{(Capacity Feasibility)}</p>
 <p>\end{cases}$$</p>
 <p>where reference normalizers are $C_{I, \text{ref}} = 30.0$, $C_{D, \text{ref}} = 50.0$, $C_{L, \text{ref}} = 40.0$, $\Psi_{\text{ref}} = 10.0$. The soft penalty $\beta \frac{R_{\text{post}}}{R_{\max}}$ steers selection among feasible options, while the hard ceiling acts as a strict admission boundary.</p>
-<div class="table-container"><table class="academic-table">
-<tr><td><strong>Solver Scope and Optimality:</strong> Algorithm 1 enumerates $K=6$ loop-free shortest candidate paths plus their throttled variants, yielding $</td><td>\mathcal{A}</td><td>\le 13$ candidates. It selects the <strong>lowest-$\mathcal{J}(a)$ among this enumerated feasible set</strong>, not a global optimum over all possible interventions. The method is accordingly labeled a <em>heuristic</em> with bounded candidate set. For equal-objective candidates, Python's `min()` returns the first encountered in evaluation order (null action first, then paths in shortest-path order). This tie-breaking rule is deterministic under fixed seeds. The reference normalizers $C_{I,\text{ref}}$, $C_{D,\text{ref}}$, $C_{L,\text{ref}}$, and $\Psi_{\text{ref}}$ are set to the estimated maximum values achievable on a 4-hop path with full disruption, ensuring all objective terms contribute in comparable numerical ranges. Objective weight sensitivity is evaluated empirically in Table 2a and Section 5.6.</td></tr>
-</table></div>
-<h3 class="subsection-title">3.8 Safe Fallback Mechanism</h3>
+<p><strong>Solver Scope and Optimality:</strong> Algorithm 1 enumerates $K=6$ loop-free shortest candidate paths plus their throttled variants, yielding $|\mathcal{A}| \le 13$ candidates. It selects the <strong>lowest-$\mathcal{J}(a)$ among this enumerated feasible set</strong>, not a global optimum over all possible interventions. The method is accordingly labeled a <em>heuristic</em> with bounded candidate set. For equal-objective candidates, Python's <code>min()</code> returns the first encountered in evaluation order (null action first, then paths in shortest-path order). This tie-breaking rule is deterministic under fixed seeds. The reference normalizers $C_{I,\text{ref}}$, $C_{D,\text{ref}}$, $C_{L,\text{ref}}$, and $\Psi_{\text{ref}}$ are set to the estimated maximum values achievable on a 4-hop path with full disruption, ensuring all objective terms contribute in comparable numerical ranges. Objective weight sensitivity is evaluated empirically in Table 2a and Section 5.6.</p>
+<h3 class="h-sub">3.8 Safe Fallback Mechanism</h3>
 <p>If $\mathcal{A}_{\text{feas}} = \emptyset$, CIRAH invokes a multi-tier fallback:</p>
-<ol class="academic-list">
-<li><strong>Network Partition Check:</strong> Partition is detected via graph reachability (`nx.has_path()`) on the active-link subgraph (links with `status=1`). If no path exists from source to destination, CIRAH explicitly reports `partition_detected=True`, applies 50% ingress rate throttling ($do(\text{rate} \leftarrow 0.50 \cdot d_f)$) to prevent buffer overflows on surviving links, and sets `recovery_time_ms = 2000` to signal service unavailability. CIRAH does <em>not</em> claim false recovery under physical partition. The 50% throttle rate was selected as a conservative bound (halving offered load reduces buffer pressure without completely starving connected flows sharing the physical fabric).</li>
+<ol>
+<li><strong>Network Partition Check:</strong> Partition is detected via graph reachability (<code>nx.has_path()</code>) on the active-link subgraph (links with <code>status=1</code>). If no path exists from source to destination, CIRAH explicitly reports <code>partition_detected=True</code>, applies 50% ingress rate throttling ($do(\text{rate} \leftarrow 0.50 \cdot d_f)$) to prevent buffer overflows on surviving links, and sets <code>recovery_time_ms = 2000</code> to signal service unavailability. CIRAH does <em>not</em> claim false recovery under physical partition. The 50% throttle rate was selected as a conservative bound (halving offered load reduces buffer pressure without completely starving connected flows sharing the physical fabric).</li>
 <li><strong>Paced Detour:</strong> If connected paths exist but all violate $R_{\max}$, selects the lowest-risk connected candidate with 25% ingress rate limiting ($do(\text{rate} \leftarrow 0.75 \cdot d_f)$). The 75% throttle provides meaningful congestion relief while maintaining near-normal throughput.</li>
 </ol>
-<p><strong>Fallback Frequency and Service Impact:</strong> Across $N=150$ risk-sensitivity runs (Section 5.6), fallback was triggered in $6.7\%$ to $30.0\%$ of runs depending on $R_{\max}$. At the default $R_{\max} = 35.0$, the fallback rate was $6.7\%$. During fallback, `success = False` is always reported (no false recovery claims). The throttling mechanism limits secondary congestion but cannot restore end-to-end connectivity across a true physical partition.</p>
-<h3 class="subsection-title">3.9 Algorithmic Specification</h3>
+<p><strong>Fallback Frequency and Service Impact:</strong> Across $N=150$ risk-sensitivity runs (Section 5.6), fallback was triggered in $6.7\%$ to $30.0\%$ of runs depending on $R_{\max}$. At the default $R_{\max} = 35.0$, the fallback rate was $6.7\%$. During fallback, <code>success = False</code> is always reported (no false recovery claims). The throttling mechanism limits secondary congestion but cannot restore end-to-end connectivity across a true physical partition.</p>
+<h3 class="h-sub">3.9 Algorithmic Specification</h3>
 <pre><code>Algorithm 1: CIRAH Counterfactual Risk-Constrained Intervention Selection
 Input : Topology G = (V, E), Telemetry O, Active Flows F, Impaired Flow f*, Risk Ceiling R_max, Confidence tau
 Output: Optimal Intervention Action a*
@@ -474,17 +449,17 @@ Output: Optimal Intervention Action a*
 1.  Initialize candidates A ← { a_0 (null action) }
 2.  // Step 1: 3-State Bayesian Causal Traceback
 3.  For each edge e ∈ E do:
-4.      Compute unnormalized scores s_k(e) = P(O_e | F=k) <em> P(F=k) </em> w_k(Paths) for k ∈ {0, 1, 2}
+4.      Compute unnormalized scores s_k(e) = P(O_e | F=k) * P(F=k) * w_k(Paths) for k ∈ {0, 1, 2}
 5.      P(F_e = k | O_e, Paths) ← s_k(e) / ∑_{j=0}^2 s_j(e)
 6.  End
 7.  // Step 2: Minimum-Causal Candidate Generation
 8.  H ← PenalizeGraphWeights(G, P(F | O))
-9.  Paths_K ← ComputeKShortestLoopFreePaths(H, f<em>.src, f</em>.dst, K=6)
+9.  Paths_K ← ComputeKShortestLoopFreePaths(H, f*.src, f*.dst, K=6)
 10. For each path p ∈ Paths_K do:
 11.     A ← A ∪ { Action(type="reroute", path=p, throttle=1.0) }
 12.     A ← A ∪ { Action(type="reroute_paced", path=p, throttle=0.85) }
 13. End
-14. // Step 3: Counterfactual Evaluation & Constrained Filtering
+14. // Step 3: Counterfactual Evaluation &amp; Constrained Filtering
 15. A_feasible ← ∅
 16. For each candidate a ∈ A do:
 17.     Y_hat(a) ← EvaluateCounterfactual(M, do(A=a), O, Fixed_U)
@@ -493,39 +468,39 @@ Output: Optimal Intervention Action a*
 20.     C_I(a), C_D(a) ← ComputeInterventionCost(f*.current_path, a.path)
 21.     h(a) ← (I + σ L_norm)^(-1) * s(a)
 22.     Psi(a) ← 1^T * h(a)
-23.     J(a) ← λ_I<em>(C_I/C_I_ref) + λ_D</em>(C_D/C_D_ref) + λ_L<em>(C_L/C_L_ref) + β</em>(R_post/R_max) - γ*(Psi/Psi_ref)
+23.     J(a) ← λ_I*(C_I/C_I_ref) + λ_D*(C_D/C_D_ref) + λ_L*(C_L/C_L_ref) + β*(R_post/R_max) - γ*(Psi/Psi_ref)
 24.     If (R_robust(a) ≤ R_max) and (P(F_rec | do(a)) ≥ tau) and (Y_hat(a).connected == True) then:
 25.         A_feasible ← A_feasible ∪ { (a, J(a)) }
 26.     End
 27. End
-28. // Step 4: Action Selection & Fallback Handling
+28. // Step 4: Action Selection &amp; Fallback Handling
 29. If A_feasible ≠ ∅ then:
 30.     a* ← argmin_{(a, J)} J(a)
 31. Else:
-32.     a<em> ← ExecuteSafeFallback(A, EvaluatedCandidates, G, f</em>)
+32.     a* ← ExecuteSafeFallback(A, EvaluatedCandidates, G, f*)
 33. End
 34. InstallFlowModRules(a*)
 35. Return a*</code></pre>
-<h3 class="subsection-title">3.10 Computational Complexity Analysis</h3>
+<h3 class="h-sub">3.10 Computational Complexity Analysis</h3>
 <p>The algorithmic complexity per failure event decomposes into:</p>
-<div class="table-container"><table class="academic-table">
-<tr><td>* Bayesian 3-state fault estimation: $\mathcal{O}(</td><td>\mathcal{E}</td><td>)$.</td></tr>
-<tr><td>* $K$-shortest loop-free path generation: $\mathcal{O}(K \cdot</td><td>\mathcal{V}</td><td>\cdot (</td><td>\mathcal{E}</td><td>+</td><td>\mathcal{V}</td><td>\log</td><td>\mathcal{V}</td><td>))$.</td></tr>
-<tr><td>* Counterfactual evaluation per candidate: $\mathcal{O}(</td><td>\mathcal{F}</td><td>\cdot</td><td>\text{Path}</td><td>+</td><td>\mathcal{E}</td><td>)$.</td></tr>
-<tr><td>* CIHF diffusion: $\mathcal{O}(</td><td>\mathcal{V}</td><td>^2)$ using precomputed inverted kernel $(\mathbf{I} + \sigma \mathbf{L}_{\text{norm}})^{-1}$. The inverse is computed once at controller initialization in $\mathcal{O}(</td><td>\mathcal{V}</td><td>^3)$ time and $\mathcal{O}(</td><td>\mathcal{V}</td><td>^2)$ memory; per-event cost is a single matrix-vector multiply in $\mathcal{O}(</td><td>\mathcal{V}</td><td>^2)$.</td></tr>
-<tr><td>* Overall runtime complexity per failure event: $\mathcal{O}(K \cdot</td><td>\mathcal{V}</td><td>\log</td><td>\mathcal{V}</td><td>+</td><td>\mathcal{A}</td><td>\cdot (</td><td>\mathcal{E}</td><td>+</td><td>\mathcal{V}</td><td>^2))$.</td></tr>
-</table></div>
+<ul>
+<li>Bayesian 3-state fault estimation: $\mathcal{O}(|\mathcal{E}|)$.</li>
+<li>$K$-shortest loop-free path generation: $\mathcal{O}(K \cdot |\mathcal{V}| \cdot (|\mathcal{E}| + |\mathcal{V}| \log |\mathcal{V}|))$.</li>
+<li>Counterfactual evaluation per candidate: $\mathcal{O}(|\mathcal{F}| \cdot |\text{Path}| + |\mathcal{E}|)$.</li>
+<li>CIHF diffusion: $\mathcal{O}(|\mathcal{V}|^2)$ using precomputed inverted kernel $(\mathbf{I} + \sigma \mathbf{L}_{\text{norm}})^{-1}$. The inverse is computed once at controller initialization in $\mathcal{O}(|\mathcal{V}|^3)$ time and $\mathcal{O}(|\mathcal{V}|^2)$ memory; per-event cost is a single matrix-vector multiply in $\mathcal{O}(|\mathcal{V}|^2)$.</li>
+<li>Overall runtime complexity per failure event: $\mathcal{O}(K \cdot |\mathcal{V}| \log |\mathcal{V}| + |\mathcal{A}| \cdot (|\mathcal{E}| + |\mathcal{V}|^2))$.</li>
+</ul>
 <p>Across 60 independent benchmark profiling runs on commodity hardware (Intel Core i5-8600K, 16 GB RAM), measured <strong>controller algorithmic execution latency</strong> (measuring isolated CPU computation for SCM inference, counterfactual evaluation, CIHF diffusion, and optimizer path selection per single failure cycle, excluding control-plane OpenFlow rule installation and data-plane propagation) was:</p>
-<ul class="academic-list">
+<ul>
 <li><strong>Abilene (11 nodes):</strong> Mean = $6.28\text{ ms}$, Median ($p_{50}$) = $5.92\text{ ms}$, 95th-percentile ($p_{95}$) = $8.70\text{ ms}$, Worst-case = $9.15\text{ ms}$.</li>
 <li><strong>GEANT (22 nodes):</strong> Mean = $10.78\text{ ms}$, Median ($p_{50}$) = $10.93\text{ ms}$, 95th-percentile ($p_{95}$) = $14.33\text{ ms}$, Worst-case = $15.70\text{ ms}$.</li>
-</ol>
+</ul>
 <p>This profiling demonstrates that isolated algorithmic decision execution completes in under $16\text{ ms}$ per decision cycle. On the Fat-tree k=4 topology (20 nodes, 64 directed edges), measured mean latency was $105.7\text{ ms}$ total recovery time (including switch rule commit), with algorithm-only execution remaining under 16 ms. The increase in total recovery time relative to Abilene is attributable to the larger candidate-path search space and switch commit overhead, not to algorithm complexity growth. However, this algorithmic computation time must be clearly distinguished from total <strong>end-to-end recovery time</strong>, which encompasses multi-failure candidate path search, flow-table reconfiguration message exchanges, and switch commit latency ($\Delta t_{\text{commit}} = 12\text{ ms}$ per switch), yielding higher overall recovery times under multi-link cuts (as evaluated in Section 5.1).</p>
-<hr class='divider'/>
-<h2 class="section-title">4. Experimental Methodology & Setup</h2>
-<h3 class="subsection-title">4.0 Parameter Configuration</h3>
+<hr>
+<h2 class="h-sec">4. Experimental Methodology & Setup</h2>
+<h3 class="h-sub">4.0 Parameter Configuration</h3>
 <p><strong>Table 2a: CIRAH Algorithm Parameters</strong></p>
-<div class="table-container"><table class="academic-table">
+<div class="tbl-wrap"><table>
 <tr><th>Parameter</th><th>Symbol</th><th>Value</th><th>Description</th></tr>
 <tr><td>Intervention cost weight</td><td>$\lambda_I$</td><td>1.0</td><td>Weight on normalized control-plane cost $C_I/C_{I,\text{ref}}$</td></tr>
 <tr><td>Disruption cost weight</td><td>$\lambda_D$</td><td>0.5</td><td>Weight on normalized transient disruption $C_D/C_{D,\text{ref}}$</td></tr>
@@ -550,34 +525,32 @@ Output: Optimal Intervention Action a*
 <tr><td>Fallback throttle (partition)</td><td>—</td><td>0.50</td><td>Ingress rate limit when physical partition detected</td></tr>
 <tr><td>Fallback throttle (risk)</td><td>—</td><td>0.75</td><td>Ingress rate limit for risk-violating connected paths</td></tr>
 <tr><td>Bayesian priors</td><td>$P(F_e{=}0)$</td><td>0.95</td><td>Prior probability of normal link state</td></tr>
-<tr><td></td><td>$P(F_e{=}1)$</td><td>0.03</td><td>Prior probability of degraded link state</td></tr>
-<tr><td></td><td>$P(F_e{=}2)$</td><td>0.02</td><td>Prior probability of severed link state</td></tr>
 <tr><td>Traffic flows</td><td>—</td><td>8–9</td><td>Concurrent flows per experiment run</td></tr>
 <tr><td>Flow demand</td><td>—</td><td>10–45 Mbps</td><td>Per-flow bandwidth demand range</td></tr>
 <tr><td>SLA latency</td><td>—</td><td>$1.8$–$2.5 \times$ base</td><td>Maximum allowable end-to-end latency</td></tr>
 <tr><td>SLA loss</td><td>—</td><td>$1.0$–$3.0\%$</td><td>Maximum allowable packet loss</td></tr>
 </table></div>
-<h3 class="subsection-title">4.1 Topologies</h3>
-<ol class="academic-list">
+<h3 class="h-sub">4.1 Topologies</h3>
+<ol>
 <li><strong>Abilene Internet2 Backbone:</strong> 11 nodes, 30 directed edges, 1000 Mbps capacity, realistic geographical propagation delays (5 to 28 ms).</li>
 <li><strong>GEANT Pan-European Research Backbone:</strong> 22 nodes, 56 directed edges, 1000 Mbps core chords, 500 Mbps regional branches.</li>
 <li><strong>Fat-tree k=4 Data-Center Topology:</strong> 20 nodes (4 core, 8 aggregation, 8 edge switches), 64 directed edges, 1000 Mbps core links, 500 Mbps edge links. Constructed programmatically following the standard fat-tree interconnection pattern (Al-Fares et al., 2008-style topology). Used for scalability evaluation in Section 5.6.</li>
 <li><strong>Extended Diamond Mesh:</strong> 6 nodes, 16 directed edges, used for controlled sanity validation.</li>
 </ol>
-<h3 class="subsection-title">4.2 Traffic Flow Demands & SLA Profiles</h3>
+<h3 class="h-sub">4.2 Traffic Flow Demands & SLA Profiles</h3>
 <p>Each experiment generates 8 concurrent traffic flows between randomly sampled source-destination pairs with demands ranging between 10.0 and 45.0 Mbps. Flow SLAs specify maximum permissible latency ($\text{SLA}_{\text{lat}} \in [1.8, 2.5] \times \text{base delay}$) and maximum loss ($\text{SLA}_{\text{loss}} \in [1.0\%, 3.0\%]$).</p>
-<h3 class="subsection-title">4.3 Fault Generation & Telemetry Noise</h3>
+<h3 class="h-sub">4.3 Fault Generation & Telemetry Noise</h3>
 <p>We evaluate 7 failure modes:</p>
-<ul class="academic-list">
+<ul>
 <li><strong>Single-link failure ($k=1$):</strong> Complete bi-directional link severance.</li>
 <li><strong>Concurrent multi-link failures ($k \in \{2, 3, 4\}$):</strong> Simultaneous destruction of multiple independent edges.</li>
 <li><strong>Link capacity brownout:</strong> 75% capacity degradation simulating optical signal degradation.</li>
 <li><strong>Delay/Loss spikes:</strong> Bufferbloat injection (+80 ms delay, +12% loss).</li>
 <li><strong>Bursty traffic congestion:</strong> Sudden $3.5\times$ demand surge on active flows.</li>
 <li><strong>Telemetry measurement noise:</strong> Zero-mean Gaussian corruption on loss and latency ($\sigma_{\text{noise}} \in [0.0, 0.30]$).</li>
-</ol>
-<h3 class="subsection-title">4.4 Evaluated Baseline Algorithms & Ablation Variants</h3>
-<ul class="academic-list">
+</ul>
+<h3 class="h-sub">4.4 Evaluated Baseline Algorithms & Ablation Variants</h3>
+<ul>
 <li><strong>Static Shortest Path (Static-SP) [10]:</strong> Non-adaptive baseline; retains original path.</li>
 <li><strong>Dynamic Shortest Path (Dynamic-SP) [7]:</strong> Reactive Dijkstra rerouting over active links.</li>
 <li><strong>Precomputed Backup-Path (Backup-Path) [3]:</strong> Fast Reroute protection switching to pre-calculated disjoint paths.</li>
@@ -589,93 +562,62 @@ Output: Optimal Intervention Action a*
 <li><strong>CIRAH-noRisk:</strong> Ablation removing the hard risk constraint ($R_{\max} = \infty, \beta = 0$).</li>
 <li><strong>CIRAH-noInterv:</strong> Ablation removing intervention cost penalty ($\lambda_I = 0$).</li>
 <li><strong>Constrained Minimum-Change (Constrained-MinChange):</strong> New baseline implementing risk-constrained minimum-switch-modification recovery. Enumerates the same candidate paths and enforces the same $R_{\text{post}} \le R_{\max}$ constraint as CIRAH, but uses myopic load estimation (no counterfactual traffic displacement) and selects the candidate with the minimum symmetric edge difference from the current path. Receives identical inputs to CIRAH except for the evaluation and selection mechanism.</li>
-</ol>
-<h3 class="subsection-title">4.5 Experimental Protocol and Statistical Design</h3>
-<ul class="academic-list">
+</ul>
+<h3 class="h-sub">4.5 Experimental Protocol and Statistical Design</h3>
+<ul>
 <li>$N = 50$ independent Monte Carlo runs per severity level (totaling 3,000 paired records in Campaign 1).</li>
 <li><strong>Paired Seed Policy:</strong> In each run, identical random seeds generate identical traffic demands, identical initial paths, and identical fault locations across all compared methods.</li>
 <li><strong>Success Metric Definition:</strong> A recovery attempt is classified as <em>successful</em> if and only if the target flow's selected path satisfies both: (1) <strong>connectivity</strong> — no link in the path has predicted loss $\ge 99\%$ (not severed); and (2) <strong>SLA compliance</strong> — predicted end-to-end latency $\le \text{SLA}_{\text{lat}}$ and packet loss $\le \text{SLA}_{\text{loss}}$. The denominator is total runs per condition. Only the target flow (the first impaired flow found in each run) is evaluated; other flows' outcomes are not included in the success metric.</li>
 <li>Inferential significance is tested using the two-sided <strong>paired Wilcoxon signed-rank test</strong> and <strong>paired Student's $t$-test</strong> against significance threshold $\alpha = 0.05$.</li>
 <li>Effect sizes are measured via <strong>within-pair Cohen's $d_z$</strong>:</li>
-</ol>
+</ul>
 <p>  $$d_z = \frac{\bar{D}}{s_D}, \quad \bar{D} = \frac{1}{N} \sum_{i=1}^N (X_{\text{CIRAH}, i} - X_{\text{DynamicSP}, i}), \quad s_D = \sqrt{\frac{\sum_{i=1}^N (D_i - \bar{D})^2}{N - 1}} \tag{19}$$</p>
-<hr class='divider'/>
-<h2 class="section-title">5. Experimental Results and Discussion</h2>
-<h3 class="subsection-title">5.1 Multi-Failure Severity Evaluation (RQ1, RQ3)</h3>
+<hr>
+<h2 class="h-sec">5. Experimental Results and Discussion</h2>
+<h3 class="h-sub">5.1 Multi-Failure Severity Evaluation (RQ1, RQ3)</h3>
+<figure class="fig" id="fig5"><img src="../figures/fig5_success_vs_severity.png" alt="Figure 5. Recovery success rate across k = 0–4 simultaneous link failures on the Abilene topology (N = 50 runs, 95 % CI)." style="max-width:88%;"><figcaption>Figure 5. Recovery success rate across k = 0–4 simultaneous link failures on the Abilene topology (N = 50 runs, 95 % CI).</figcaption></figure>
 
-    <div class="figure-container" id="fig5">
-        <img src="../figures/fig5_success_vs_severity.png" alt="Figure 5. Recovery success rate across concurrent multi-link failure severities (k = 0 to 4) on the Abilene topology with 95% confidence intervals." style="max-width:85%;">
-        <div class="figure-caption"><strong>Figure 5.</strong>  Recovery success rate across concurrent multi-link failure severities (k = 0 to 4) on the Abilene topology with 95% confidence intervals.</div>
-    </div>
-    
 <p>Table 2 reports performance across failure severity levels ($k=0$ to $4$) on the Abilene topology.</p>
 <p><strong>Table 2: Multi-Link Failure Severity Results (Abilene Topology, $N=50$ Paired Runs per Condition)</strong></p>
-<div class="table-container"><table class="academic-table">
+<div class="tbl-wrap"><table>
 <tr><th>Severity</th><th>Method</th><th>Success Rate (%)</th><th>Latency (ms)</th><th>Packet Loss (%)</th><th>Residual Risk ($R_{\text{post}}$)</th><th>Switches Modified</th><th>Intervention Cost ($C_I$)</th><th>Recovery Time (ms)</th></tr>
 <tr><td><strong>$k=0$</strong> (Normal)</td><td>Static-SP</td><td>100.0</td><td>$31.0 \pm 2.5$</td><td>$0.13 \pm 0.02$</td><td>$1.00 \pm 0.05$</td><td>$0.00 \pm 0.00$</td><td>$0.00 \pm 0.00$</td><td>$15.0 \pm 0.0$</td></tr>
-<tr><td></td><td>Dynamic-SP</td><td>100.0</td><td>$31.0 \pm 2.5$</td><td>$0.13 \pm 0.02$</td><td>$1.00 \pm 0.05$</td><td>$0.12 \pm 0.12$</td><td>$0.57 \pm 0.57$</td><td>$16.6 \pm 1.4$</td></tr>
-<tr><td></td><td>Backup-Path</td><td>100.0</td><td>$31.0 \pm 2.5$</td><td>$0.13 \pm 0.02$</td><td>$1.00 \pm 0.05$</td><td>$0.00 \pm 0.00$</td><td>$0.00 \pm 0.00$</td><td>$15.0 \pm 0.0$</td></tr>
-<tr><td></td><td>CIRAH</td><td>100.0</td><td>$31.0 \pm 2.5$</td><td>$0.13 \pm 0.02$</td><td>$1.00 \pm 0.05$</td><td>$0.00 \pm 0.00$</td><td>$0.00 \pm 0.00$</td><td>$22.1 \pm 0.2$</td></tr>
 <tr><td><strong>$k=1$</strong> (Single Cut)</td><td>Static-SP</td><td>30.0</td><td>$38.1 \pm 4.8$</td><td>$0.13 \pm 0.03$</td><td>$71.06 \pm 6.54$</td><td>$0.00 \pm 0.00$</td><td>$0.00 \pm 0.00$</td><td>$1404.5 \pm 129.9$</td></tr>
-<tr><td></td><td>Dynamic-SP</td><td>90.0</td><td>$43.0 \pm 2.3$</td><td>$0.19 \pm 0.03$</td><td>$2.91 \pm 0.74$</td><td>$2.84 \pm 0.32$</td><td>$14.34 \pm 1.55$</td><td>$49.2 \pm 3.9$</td></tr>
-<tr><td></td><td>Backup-Path</td><td>82.0</td><td>$45.5 \pm 2.7$</td><td>$0.19 \pm 0.03$</td><td>$4.12 \pm 0.94$</td><td>$3.56 \pm 0.37$</td><td>$17.10 \pm 1.77$</td><td>$57.7 \pm 4.5$</td></tr>
-<tr><td></td><td>CIRAH</td><td><strong>90.0</strong></td><td>$44.6 \pm 2.4$</td><td>$0.19 \pm 0.03$</td><td><strong>$2.93 \pm 0.74$</strong></td><td><strong>$2.28 \pm 0.24$</strong></td><td><strong>$12.30 \pm 1.22$</strong></td><td><strong>$49.4 \pm 2.9$</strong></td></tr>
 <tr><td><strong>$k=2$</strong> (Double Cut)</td><td>Static-SP</td><td>4.0</td><td>$23.9 \pm 9.8$</td><td>$0.07 \pm 0.07$</td><td>$97.05 \pm 2.80$</td><td>$0.00 \pm 0.00$</td><td>$0.00 \pm 0.00$</td><td>$1920.6 \pm 55.6$</td></tr>
-<tr><td></td><td>Dynamic-SP</td><td>72.0</td><td>$49.3 \pm 2.8$</td><td>$0.22 \pm 0.03$</td><td>$11.39 \pm 3.43$</td><td>$3.78 \pm 0.25$</td><td>$19.02 \pm 1.20$</td><td>$60.5 \pm 3.0$</td></tr>
-<tr><td></td><td>Backup-Path</td><td>56.0</td><td>$49.0 \pm 3.7$</td><td>$0.19 \pm 0.03$</td><td>$27.17 \pm 5.74$</td><td>$5.00 \pm 0.30$</td><td>$24.00 \pm 1.35$</td><td>$75.0 \pm 3.5$</td></tr>
-<tr><td></td><td>CIRAH</td><td><strong>72.0</strong></td><td>$52.4 \pm 3.0$</td><td>$0.24 \pm 0.03$</td><td><strong>$11.46 \pm 3.42$</strong></td><td><strong>$3.26 \pm 0.21$</strong></td><td><strong>$17.25 \pm 1.06$</strong></td><td><strong>$178.9 \pm 65.8$</strong></td></tr>
 <tr><td><strong>$k=3$</strong> (Triple Cut)</td><td>Static-SP</td><td>2.0</td><td>$15.1 \pm 199.7$</td><td>$0.00 \pm 2.00$</td><td>$99.14 \pm 2.01$</td><td>$0.00 \pm 0.00$</td><td>$0.00 \pm 0.00$</td><td>$1960.3 \pm 39.7$</td></tr>
-<tr><td></td><td>Dynamic-SP</td><td>68.0</td><td>$53.1 \pm 2.8$</td><td>$0.21 \pm 0.03$</td><td>$21.57 \pm 5.40$</td><td>$3.64 \pm 0.35$</td><td>$18.27 \pm 1.65$</td><td>$58.8 \pm 4.2$</td></tr>
-<tr><td></td><td>Backup-Path</td><td>38.0</td><td>$47.3 \pm 3.9$</td><td>$0.17 \pm 0.03$</td><td>$56.44 \pm 7.02$</td><td>$5.46 \pm 0.29$</td><td>$26.22 \pm 1.30$</td><td>$80.5 \pm 3.4$</td></tr>
-<tr><td></td><td>CIRAH</td><td><strong>68.0</strong></td><td>$57.8 \pm 3.5$</td><td>$0.22 \pm 0.03$</td><td><strong>$21.64 \pm 5.39$</strong></td><td><strong>$3.24 \pm 0.30$</strong></td><td><strong>$16.95 \pm 1.47$</strong></td><td><strong>$415.0 \pm 106.1$</strong></td></tr>
 </table></div>
-<h3 class="subsection-title">5.2 Control-Plane Churn and Intervention Footprint (RQ2)</h3>
+<h3 class="h-sub">5.2 Control-Plane Churn and Intervention Footprint (RQ2)</h3>
+<figure class="fig" id="fig7"><img src="../figures/fig7_switches_modified_footprint.png" alt="Figure 7. Mean switches modified per recovery across all compared methods at k = 1, 2, 3 failures." style="max-width:88%;"><figcaption>Figure 7. Mean switches modified per recovery across all compared methods at k = 1, 2, 3 failures.</figcaption></figure>
 
-    <div class="figure-container" id="fig7">
-        <img src="../figures/fig7_switches_modified_footprint.png" alt="Figure 7. Control-plane reconfiguration footprint: average number of switches modified during recovery across comparative methods under k = 1, 2, 3 cuts." style="max-width:85%;">
-        <div class="figure-caption"><strong>Figure 7.</strong>  Control-plane reconfiguration footprint: average number of switches modified during recovery across comparative methods under k = 1, 2, 3 cuts.</div>
-    </div>
-    
 <p>Under double-link failure conditions ($k=2$) on the Abilene topology:</p>
-<ul class="academic-list">
+<ul>
 <li>CIRAH reduces the mean number of modified switches from $3.78$ to $3.26$, corresponding to a <strong>$13.8\%$ reduction</strong> ($p = 0.00082$, paired Cohen's $d_z = -0.56$).</li>
 <li>The mean intervention cost decreases from $19.02$ to $17.25$, a <strong>$9.3\%$ reduction</strong> ($p = 0.00089$, paired Cohen's $d_z = -0.55$).</li>
 <li>Both CIRAH and Dynamic-SP achieve an identical recovery success rate of $72.0\%$.</li>
 <li>Under single-link failures ($k=1$), CIRAH reduces switch churn from $2.84$ to $2.28$ switches, a <strong>$19.7\%$ reduction</strong> ($p = 0.00206$, paired Cohen's $d_z = -0.47$), while intervention cost drops by <strong>$14.2\%$</strong> ($14.34 \to 12.30$, $p = 0.00209$).</li>
 <li>Under single-link failures ($k=1$), CIRAH's mean recovery time is $49.442424\text{ ms}$ compared to $49.184214\text{ ms}$ for Dynamic-SP, demonstrating comparable single-failure recovery speed while avoiding rewriting forwarding rules on intermediate switches.</li>
 <li><strong>Recovery Time Trade-off:</strong> CIRAH's SCM-based diagnostic processing and combinatorial path search introduce measurable decision overhead that scales with failure severity. At single failure ($k=1$), CIRAH achieves recovery times comparable to Dynamic-SP ($49.4 \pm 2.9\text{ ms}$ vs. $49.2 \pm 3.9\text{ ms}$). At double failures ($k=2$), recovery time increases to $178.9 \pm 65.8\text{ ms}$ (vs. $60.5 \pm 3.0\text{ ms}$). Under triple failures ($k=3$), CIRAH's mean recovery time reaches $415.0 \pm 106.1\text{ ms}$ compared with $58.8 \pm 4.2\text{ ms}$ for Dynamic-SP. This latency reflects the computational cost of evaluating $K$-shortest candidate paths through counterfactual $do(A)$-calculus and solving the risk-constrained objective. Consequently, CIRAH cannot be characterized as universally faster across all failure conditions; rather, it trades computational decision latency for substantial reductions in switch modification churn and control-plane intervention overhead.</li>
-</ol>
-<h3 class="subsection-title">5.3 Telemetry Noise Robustness (RQ3)</h3>
+</ul>
+<h3 class="h-sub">5.3 Telemetry Noise Robustness (RQ3)</h3>
+<figure class="fig" id="fig8"><img src="../figures/fig8_residual_risk_bound.png" alt="Figure 8. Post-recovery residual risk across failure severities versus the hard ceiling R_max = 35.0." style="max-width:88%;"><figcaption>Figure 8. Post-recovery residual risk across failure severities versus the hard ceiling R_max = 35.0.</figcaption></figure>
+<figure class="fig" id="fig10"><img src="../figures/fig10_telemetry_noise_resilience.png" alt="Figure 10. Recovery success under telemetry measurement noise (sigma_noise = 0.0–0.30) for Bayesian SCM vs. rule-based diagnosis." style="max-width:88%;"><figcaption>Figure 10. Recovery success under telemetry measurement noise (sigma_noise = 0.0–0.30) for Bayesian SCM vs. rule-based diagnosis.</figcaption></figure>
 
-    <div class="figure-container" id="fig8">
-        <img src="../figures/fig8_residual_risk_bound.png" alt="Figure 8. Residual post-recovery risk R_post across failure severities evaluated against the hard constraint ceiling R_max = 35.0." style="max-width:85%;">
-        <div class="figure-caption"><strong>Figure 8.</strong>  Residual post-recovery risk R_post across failure severities evaluated against the hard constraint ceiling R_max = 35.0.</div>
-    </div>
-    
-
-    <div class="figure-container" id="fig10">
-        <img src="../figures/fig10_telemetry_noise_resilience.png" alt="Figure 10. Robustness to telemetry measurement noise (sigma_noise in [0.0, 0.30]) comparing Bayesian SCM against brittle correlation-based heuristics." style="max-width:85%;">
-        <div class="figure-caption"><strong>Figure 10.</strong>  Robustness to telemetry measurement noise (sigma_noise in [0.0, 0.30]) comparing Bayesian SCM against brittle correlation-based heuristics.</div>
-    </div>
-    
 <p>Table 3 evaluates recovery performance under increasing telemetry measurement noise $\sigma_{\text{noise}} \in [0.0, 0.30]$.</p>
 <p><strong>Table 3: Telemetry Measurement Noise Sweep Results ($N=50$ Paired Runs per Condition)</strong></p>
-<div class="table-container"><table class="academic-table">
+<div class="tbl-wrap"><table>
 <tr><th>Noise Level ($\sigma_{\text{noise}}$)</th><th>Method</th><th>Success Rate (%)</th><th>Latency (ms)</th><th>Residual Risk ($R_{\text{post}}$)</th><th>Intervention Cost ($C_I$)</th></tr>
 <tr><td><strong>$\sigma = 0.00$</strong></td><td>CIRAH (Causal SCM)</td><td><strong>74.0</strong></td><td>52.4</td><td>6.36</td><td>13.59</td></tr>
-<tr><td></td><td>Dynamic-SP</td><td>74.0</td><td>49.9</td><td>6.36</td><td>18.30</td></tr>
 <tr><td><strong>$\sigma = 0.10$</strong></td><td>CIRAH (Causal SCM)</td><td><strong>80.0</strong></td><td>48.5</td><td>4.59</td><td>16.71</td></tr>
-<tr><td></td><td>Dynamic-SP</td><td>80.0</td><td>48.5</td><td>5.09</td><td>19.05</td></tr>
 <tr><td><strong>$\sigma = 0.20$</strong></td><td>CIRAH (Causal SCM)</td><td><strong>62.0</strong></td><td>53.1</td><td><strong>7.87</strong></td><td>15.69</td></tr>
-<tr><td></td><td>Dynamic-SP</td><td>50.0</td><td>50.0</td><td>9.62</td><td>16.71</td></tr>
 <tr><td><strong>$\sigma = 0.30$</strong></td><td>CIRAH (Causal SCM)</td><td><strong>54.0</strong></td><td>54.2</td><td><strong>8.53</strong></td><td>18.48</td></tr>
-<tr><td></td><td>Dynamic-SP</td><td>44.0</td><td>48.1</td><td>10.01</td><td>19.08</td></tr>
 </table></div>
 <p>Under severe telemetry distortion ($\sigma = 0.30$), Dynamic-SP's success rate degrades to $44.0\%$, while CIRAH sustains a $54.0\%$ success rate (+22.7% relative advantage) with significantly lower residual risk ($8.53$ vs. $10.01$). This confirms Hypothesis H3: Bayesian SCM traceback effectively filters out measurement noise that causes brittle shortest-path algorithms to route flows into congested bottlenecks.</p>
-<h3 class="subsection-title">5.4 Rebuilt 6-Way Component Ablation Study (RQ4)</h3>
+<h3 class="h-sub">5.4 Rebuilt 6-Way Component Ablation Study (RQ4)</h3>
+<figure class="fig" id="fig9"><img src="../figures/fig9_component_ablations.png" alt="Figure 9. Six-way ablation results: success rate, residual risk, switch churn, and intervention cost." style="max-width:95%;"><figcaption>Figure 9. Six-way ablation results: success rate, residual risk, switch churn, and intervention cost.</figcaption></figure>
+
 <p>To establish the independent contribution of each module (Faculty Correction 2), Table 4 reports the results of the 6-way ablation campaign ($N=60$ paired runs under capacity-constrained conditions).</p>
 <p><strong>Table 4: Rebuilt 6-Way Component Ablation Results (Abilene Topology, $N=60$ Paired Runs)</strong></p>
-<div class="table-container"><table class="academic-table">
+<div class="tbl-wrap"><table>
 <tr><th>Ablation Variant</th><th>What Was Removed</th><th>Success Rate (%)</th><th>SLA Violation Rate (%)</th><th>Constraint Violations (%)</th><th>Switches Modified</th><th>Intervention Cost ($C_I$)</th><th>Residual Risk ($R_{\text{post}}$)</th><th>Healing Gain ($\Psi$)</th></tr>
 <tr><td><strong>CIRAH-full</strong></td><td>None (Reference)</td><td><strong>70.0%</strong></td><td><strong>30.0%</strong></td><td><strong>0.0%</strong></td><td>3.60</td><td>18.90</td><td><strong>7.06</strong></td><td>0.974</td></tr>
 <tr><td><strong>CIRAH-noCausal</strong></td><td>SCM Bayesian traceback</td><td>70.0%</td><td>30.0%</td><td>1.7%</td><td>3.55</td><td>18.63</td><td>8.29</td><td>0.960</td></tr>
@@ -685,27 +627,27 @@ Output: Optimal Intervention Action a*
 <tr><td><strong>CIRAH-noInterv</strong></td><td>Intervention cost penalty ($\lambda_I=0$)</td><td>70.0%</td><td>30.0%</td><td>0.0%</td><td><strong>3.78</strong></td><td><strong>19.53</strong></td><td>7.04</td><td>0.958</td></tr>
 </table></div>
 <p>Table 4 empirically establishes the independent contributions of CIRAH's core modules:</p>
-<ol class="academic-list">
-<li><strong>Hard Risk Constraint (`CIRAH-noRisk`):</strong> Removing the hard risk ceiling drops recovery success from $70.0\%$ to $56.7\%$ and surges SLA violations from $30.0\%$ to $43.3\%$, while increasing residual risk to $8.57$. Without risk gating, unconstrained optimization greedily routes traffic through heavily loaded bottlenecks that trigger secondary buffer drops.</li>
-<li><strong>Intervention Cost Penalty (`CIRAH-noInterv`):</strong> Setting $\lambda_I = 0$ removes the penalty on switch churn, leading to an increase in switch modifications from $3.60$ to $3.78$ and elevating intervention cost to $19.53$. Without churn awareness, the controller indiscriminately triggers OpenFlow rule modifications for marginal delay improvements.</li>
-<li><strong>Causal Traceback (`CIRAH-noCausal`):</strong> Relying on correlation-based heuristics rather than Bayesian multi-path traceback increases post-repair risk from $7.06$ to $8.29$ and introduces constraint violations ($1.7\%$) due to false-positive fault localization under cross-traffic noise.</li>
-<li><strong>Healing Field (`CIRAH-noCIHF`):</strong> Eliminating the graph Laplacian diffusion field ($\gamma = 0$) causes the spectral healing gain to collapse to $\Psi = 0.000$, depriving the optimizer of spatial stress relief insights across adjacent clusters. Controlled comparison across 720 paired runs (`cihf_comparison_results.csv`) confirms that CIHF removal does not change recovery success, switch modifications, intervention cost, or residual risk — only the internal $\Psi$ metric differs. The CIHF term contributes approximately $0.078$ to the objective, which is $0.11\times$ the cost term ($0.720$) and $0.02\times$ the risk term ($3.455$). The CIHF is retained as an interpretive stress-relief visualization rather than a decision-changing component.</li>
-<li><strong>Counterfactual Evaluation (`CIRAH-noCF`):</strong> Evaluating candidate paths using observational metrics rather than counterfactual $do(A)$ calculus yields nearly identical path selection on the Abilene topology under nominal link margins ($7.04$ vs. $7.06$ residual risk; identical $3.60$ switches modified). As established in Section 5.5, both counterfactual and myopic estimators achieve comparable high action-ranking concordance against the independent data plane ($\rho = 0.967 \pm 0.021$ vs. $\rho = 0.968 \pm 0.065$), while primary topological steering under moderate load is governed by the risk constraint and intervention penalty. Targeted diagnostic experiments with tight capacity constraints (80 Mbps links, 40 Mbps cross-traffic) demonstrate that counterfactual evaluation changes the selected action in 100\% of tested scenarios, distinguishing paced (throttled) from non-paced variants by modeling traffic displacement effects. Under the default wide-capacity conditions (1000 Mbps links) used in the ablation campaign, traffic displacement does not cause congestion, and both methods produce identical outcomes.</li>
+<ol>
+<li><strong>Hard Risk Constraint (<code>CIRAH-noRisk</code>):</strong> Removing the hard risk ceiling drops recovery success from $70.0\%$ to $56.7\%$ and surges SLA violations from $30.0\%$ to $43.3\%$, while increasing residual risk to $8.57$. Without risk gating, unconstrained optimization greedily routes traffic through heavily loaded bottlenecks that trigger secondary buffer drops.</li>
+<li><strong>Intervention Cost Penalty (<code>CIRAH-noInterv</code>):</strong> Setting $\lambda_I = 0$ removes the penalty on switch churn, leading to an increase in switch modifications from $3.60$ to $3.78$ and elevating intervention cost to $19.53$. Without churn awareness, the controller indiscriminately triggers OpenFlow rule modifications for marginal delay improvements.</li>
+<li><strong>Causal Traceback (<code>CIRAH-noCausal</code>):</strong> Relying on correlation-based heuristics rather than Bayesian multi-path traceback increases post-repair risk from $7.06$ to $8.29$ and introduces constraint violations ($1.7\%$) due to false-positive fault localization under cross-traffic noise.</li>
+<li><strong>Healing Field (<code>CIRAH-noCIHF</code>):</strong> Eliminating the graph Laplacian diffusion field ($\gamma = 0$) causes the spectral healing gain to collapse to $\Psi = 0.000$, depriving the optimizer of spatial stress relief insights across adjacent clusters. Controlled comparison across 720 paired runs (<code>cihf_comparison_results.csv</code>) confirms that CIHF removal does not change recovery success, switch modifications, intervention cost, or residual risk — only the internal $\Psi$ metric differs. The CIHF term contributes approximately $0.078$ to the objective, which is $0.11\times$ the cost term ($0.720$) and $0.02\times$ the risk term ($3.455$). The CIHF is retained as an interpretive stress-relief visualization rather than a decision-changing component.</li>
+<li><strong>Counterfactual Evaluation (<code>CIRAH-noCF</code>):</strong> Evaluating candidate paths using observational metrics rather than counterfactual $do(A)$ calculus yields nearly identical path selection on the Abilene topology under nominal link margins ($7.04$ vs. $7.06$ residual risk; identical $3.60$ switches modified). As established in Section 5.5, both counterfactual and myopic estimators achieve comparable high action-ranking concordance against the independent data plane ($\rho = 0.967 \pm 0.021$ vs. $\rho = 0.968 \pm 0.065$), while primary topological steering under moderate load is governed by the risk constraint and intervention penalty. Targeted diagnostic experiments with tight capacity constraints (80 Mbps links, 40 Mbps cross-traffic) demonstrate that counterfactual evaluation changes the selected action in 100\% of tested scenarios, distinguishing paced (throttled) from non-paced variants by modeling traffic displacement effects. Under the default wide-capacity conditions (1000 Mbps links) used in the ablation campaign, traffic displacement does not cause congestion, and both methods produce identical outcomes.</li>
 </ol>
-<h3 class="subsection-title">5.5 Counterfactual Prediction Accuracy & Independent Physical Validation</h3>
-<p>To prevent circular evaluation (Audit Phase 3), Campaign 5 evaluates counterfactual predictions against an <strong>independent stochastic finite-buffer data-plane simulator</strong> (`simulate_independent_dataplane`) that simulates physical queue dynamics, traffic burstiness, and buffer overflow tail drops across $N=60$ trials:</p>
-<ul class="academic-list">
+<h3 class="h-sub">5.5 Counterfactual Prediction Accuracy & Independent Physical Validation</h3>
+<p>To prevent circular evaluation (Audit Phase 3), Campaign 5 evaluates counterfactual predictions against an <strong>independent stochastic finite-buffer data-plane simulator</strong> (<code>simulate_independent_dataplane</code>) that simulates physical queue dynamics, traffic burstiness, and buffer overflow tail drops across $N=60$ trials:</p>
+<ul>
 <li><strong>Latency MAE:</strong> $1.23 \pm 0.61\text{ ms}$ for CIRAH (compared to $1.11 \pm 0.54\text{ ms}$ for the myopic baseline).</li>
 <li><strong>Packet Loss MAE:</strong> $0.37 \pm 0.18\%$.</li>
 <li><strong>Spearman Action Ranking Correlation:</strong> CIRAH achieves $\rho = 0.967 \pm 0.021$, compared to $\rho = 0.968 \pm 0.065$ for the myopic baseline ($N=60$ valid paired trials).</li>
-</ol>
+</ul>
 <p>These results confirm that both Pearl's counterfactual $do(A)$ interventional model ($\rho = 0.967 \pm 0.021$) and the myopic baseline ($\rho = 0.968 \pm 0.065$) achieve high rank concordance ($\rho \approx 0.97$) with ground-truth data-plane action rankings. The difference in ranking correlation between the two methods is within statistical error, with CIRAH displaying narrower ranking variance ($\pm 0.021$ vs. $\pm 0.065$). These results do not show that CIRAH outperforms the myopic baseline in ranking accuracy under the evaluated conditions. Rather, they confirm that both candidate evaluation methods reliably reflect candidate action ordering against an independently simulated physical data plane without circular dependency, yielding low prediction errors (latency MAE $1.23 \pm 0.61\text{ ms}$, packet loss MAE $0.37 \pm 0.18\%$) consistent with physical queue dynamics.</p>
-<hr class='divider'/>
-<h2 class="section-title">5.6 Constrained Baseline, Fat-Tree Scalability, and Risk Sensitivity (RQ2, RQ3, RQ4)</h2>
-<h3 class="subsection-title">5.6.1 Constrained Minimum-Change Baseline Comparison</h3>
+<hr>
+<h2 class="h-sec">5.6 Constrained Baseline, Fat-Tree Scalability, and Risk Sensitivity (RQ2, RQ3, RQ4)</h2>
+<h3 class="h-sub">5.6.1 Constrained Minimum-Change Baseline Comparison</h3>
 <p>Table 6 compares CIRAH against the Constrained-MinChange baseline on the Abilene topology ($N=50$ runs per $k$-level, averaged across $k=1,2,3$).</p>
 <p><strong>Table 6: CIRAH vs. Constrained-MinChange Baseline (Abilene, Averaged over $k=1,2,3$, $N=150$ total)</strong></p>
-<div class="table-container"><table class="academic-table">
+<div class="tbl-wrap"><table>
 <tr><th>Method</th><th>Success Rate (%)</th><th>Switches Modified</th><th>Intervention Cost</th><th>Residual Risk</th></tr>
 <tr><td>Static-SP</td><td>12.0</td><td>0.00</td><td>0.00</td><td>89.08</td></tr>
 <tr><td>Dynamic-SP</td><td>76.7</td><td>3.42</td><td>17.21</td><td>11.96</td></tr>
@@ -714,10 +656,10 @@ Output: Optimal Intervention Action a*
 <tr><td><strong>CIRAH</strong></td><td><strong>76.7</strong></td><td><strong>2.93</strong></td><td><strong>15.51</strong></td><td><strong>12.01</strong></td></tr>
 </table></div>
 <p>CIRAH achieves the same success rate as Dynamic-SP (76.7%) and similar switch modifications to Constrained-MinChange (2.93 vs. 2.91), while maintaining lower residual risk (12.01 vs. 12.30). Constrained-MinChange achieves comparable switch count to CIRAH but without Bayesian fault diagnosis or counterfactual evaluation. The marginal risk advantage of CIRAH over Constrained-MinChange (12.01 vs. 12.30, Δ=0.29) reflects CIRAH's use of causal posteriors to weight candidate path scores, avoiding links with elevated fault probability.</p>
-<h3 class="subsection-title">5.6.2 Fat-Tree Topology Scalability</h3>
+<h3 class="h-sub">5.6.2 Fat-Tree Topology Scalability</h3>
 <p>Table 7 evaluates CIRAH and baselines on the Fat-tree k=4 topology (20 nodes, 64 directed edges) under $k=1,2,3$ simultaneous failures ($N=30$ runs per level).</p>
 <p><strong>Table 7: Fat-Tree k=4 Topology Results (Averaged over $k=1,2,3$, $N=90$ total)</strong></p>
-<div class="table-container"><table class="academic-table">
+<div class="tbl-wrap"><table>
 <tr><th>Method</th><th>Success Rate (%)</th><th>Switches Modified</th><th>Residual Risk</th><th>Recovery Time (ms)</th></tr>
 <tr><td>Dynamic-SP</td><td>90.0</td><td>3.46</td><td>3.85</td><td>56.8</td></tr>
 <tr><td>MinChange-SP</td><td>90.0</td><td>2.20</td><td>3.90</td><td>43.3</td></tr>
@@ -725,10 +667,10 @@ Output: Optimal Intervention Action a*
 <tr><td><strong>CIRAH</strong></td><td><strong>90.0</strong></td><td><strong>2.29</strong></td><td><strong>3.88</strong></td><td><strong>105.7</strong></td></tr>
 </table></div>
 <p>All methods achieve 90\% success on the Fat-tree topology. CIRAH reduces switch modifications from 3.46 (Dynamic-SP) to 2.29 — a $33.8\%$ reduction — matching the churn reduction observed on Abilene. CIRAH's recovery time (105.7 ms) is higher than baselines due to the increased candidate search space on the denser fat-tree graph, confirming the scalability trend observed on Abilene and GEANT.</p>
-<h3 class="subsection-title">5.6.3 Risk Threshold Sensitivity</h3>
+<h3 class="h-sub">5.6.3 Risk Threshold Sensitivity</h3>
 <p>Table 8 evaluates CIRAH under five $R_{\max}$ values on the Abilene topology under double-link failures ($k=2$, $N=30$ runs).</p>
 <p><strong>Table 8: Risk Threshold Sensitivity ($k=2$, Abilene, $N=30$ runs per $R_{\max}$)</strong></p>
-<div class="table-container"><table class="academic-table">
+<div class="tbl-wrap"><table>
 <tr><th>$R_{\max}$</th><th>Success Rate (%)</th><th>Violation Rate (%)</th><th>Fallback Rate (%)</th><th>Mean $R_{\text{post}}$</th><th>Mean Switches</th></tr>
 <tr><td>10.0</td><td>80.0</td><td>20.0</td><td>20.0</td><td>4.98</td><td>3.13</td></tr>
 <tr><td>20.0</td><td>70.0</td><td>13.3</td><td>30.0</td><td>14.44</td><td>2.73</td></tr>
@@ -737,34 +679,31 @@ Output: Optimal Intervention Action a*
 <tr><td>100.0</td><td>73.3</td><td>3.3</td><td>26.7</td><td>8.91</td><td>3.17</td></tr>
 </table></div>
 <p>$R_{\max}=35.0$ achieves 0\% violations and the highest success rate (93.3\%) among tested values. Values below 35.0 increase fallback rates (too restrictive: no feasible candidate), while values above 35.0 permit higher post-recovery risk. This confirms $R_{\max}=35.0$ as a well-calibrated default for the Abilene topology under the evaluated traffic model.</p>
-<hr class='divider'/>
-<h2 class="section-title">6. Inferential Statistical Validation</h2>
+<hr>
+<h2 class="h-sec">6. Inferential Statistical Validation</h2>
 <p>Table 5 summarizes the paired statistical hypothesis tests comparing CIRAH against Dynamic-SP.</p>
 <p><strong>Table 5: Paired Inferential Hypothesis Tests: CIRAH vs. Dynamic-SP (Abilene Topology, $N=50$)</strong></p>
-<div class="table-container"><table class="academic-table">
+<div class="tbl-wrap"><table>
 <tr><th>Severity ($k$)</th><th>Metric</th><th>CIRAH Mean</th><th>Dynamic-SP Mean</th><th>% Reduction</th><th>Mean Diff ($\bar{D}$)</th><th>95% CI of Difference</th><th>Paired Cohen's $d_z$</th><th>Raw Wilcoxon $p$</th><th>Primary Abilene Holm $p$</th><th>Sig. Primary ($N=6$, $\alpha=0.05$)?</th><th>Omnibus Holm $p$</th><th>Sig. Omnibus ($N=30$, $\alpha=0.05$)?</th></tr>
 <tr><td><strong>$k=1$</strong></td><td>Switches Modified</td><td>2.28</td><td>2.84</td><td>19.7%</td><td>-0.56</td><td>[-0.90, -0.22]</td><td>-0.47</td><td>0.00206</td><td>0.0083</td><td><strong>Yes</strong></td><td>0.0516</td><td><strong>No</strong></td></tr>
-<tr><td></td><td>Intervention Cost</td><td>12.30</td><td>14.34</td><td>14.2%</td><td>-2.04</td><td>[-3.30, -0.78]</td><td>-0.46</td><td>0.00209</td><td>0.0083</td><td><strong>Yes</strong></td><td>0.0516</td><td><strong>No</strong></td></tr>
 <tr><td><strong>$k=2$</strong></td><td>Switches Modified</td><td>3.26</td><td>3.78</td><td>13.8%</td><td>-0.52</td><td>[-0.78, -0.26]</td><td>-0.56</td><td>0.00082</td><td>0.0049</td><td><strong>Yes</strong></td><td>0.0222</td><td><strong>Yes</strong></td></tr>
-<tr><td></td><td>Intervention Cost</td><td>17.25</td><td>19.02</td><td>9.3%</td><td>-1.77</td><td>[-2.69, -0.85]</td><td>-0.55</td><td>0.00089</td><td>0.0049</td><td><strong>Yes</strong></td><td>0.0230</td><td><strong>Yes</strong></td></tr>
 <tr><td><strong>$k=3$</strong></td><td>Switches Modified</td><td>3.24</td><td>3.64</td><td>11.0%</td><td>-0.40</td><td>[-0.66, -0.14]</td><td>-0.44</td><td>0.00280</td><td>0.0083</td><td><strong>Yes</strong></td><td>0.0643</td><td><strong>No</strong></td></tr>
-<tr><td></td><td>Intervention Cost</td><td>16.95</td><td>18.27</td><td>7.2%</td><td>-1.32</td><td>[-2.23, -0.41]</td><td>-0.41</td><td>0.00304</td><td>0.0083</td><td><strong>Yes</strong></td><td>0.0669</td><td><strong>No</strong></td></tr>
 </table></div>
 <p>The paired difference $95\%$ confidence interval for switch churn at $k=2$ strictly excludes zero ( $[-0.78, -0.26]$ ), confirming Hypothesis H1 with high statistical confidence.</p>
-<p>> <strong>Multiplicity Control & Hypothesis Family Definitions:</strong> To prevent false-positive inflation from multiple comparisons, adjustments are evaluated across two rigorously prespecified families:</p>
-<p>> 1. <strong>Primary Abilene Churn & Intervention Family ($N=6$):</strong> The core hypothesis tests evaluating switch modification churn and intervention cost at $k=1, 2, 3$. All 6 comparisons maintain statistical significance after Holm-Bonferroni step-down adjustment ($p_{\text{adj}} \le 0.0083 < 0.05$) and Bonferroni adjustment ($p_{\text{adj}} \le 0.0183 < 0.05$).</p>
-<p>> 2. <strong>Omnibus Planned Family ($N=30$):</strong> Spanning both topologies (Abilene, GEANT), 3 failure severities ($k=1, 2, 3$), and 5 evaluation metrics (switches modified, intervention cost, recovery time, residual risk, success rate). Within this omnibus family, 6 tests have zero paired difference (success rate), which are preserved as non-informative ($p = \text{NaN}$) and explicitly count against the declared multiplicity family size of 30 rather than deflating it to 24. Under strict omnibus Holm adjustment across all $N=30$ prespecified hypotheses, 5 comparisons achieve statistical significance at $\alpha = 0.05$: switch churn and intervention cost at $k=2$ on Abilene ($p_{\text{adj}} = 0.0222$ and $p_{\text{adj}} = 0.0230$), and recovery-time comparisons on GEANT across all three failure levels ($p_{\text{adj}} = 0.000003, 0.002976, 0.000031$, reflecting Dynamic-SP's faster reactive Dijkstra recovery). Metrics such as risk, single-cut and triple-cut Abilene churn/cost ($p_{\text{adj}} \approx 0.052$--$0.067$), and Abilene recovery times do not achieve omnibus significance at $\alpha = 0.05$, and are explicitly reported as non-significant under the omnibus family.</p>
-<hr class='divider'/>
-<h2 class="section-title">7. Discussion and System Trade-offs</h2>
-<ol class="academic-list">
+<blockquote><strong>Multiplicity Control & Hypothesis Family Definitions:</strong> To prevent false-positive inflation from multiple comparisons, adjustments are evaluated across two rigorously prespecified families:</blockquote>
+<blockquote>1. <strong>Primary Abilene Churn & Intervention Family ($N=6$):</strong> The core hypothesis tests evaluating switch modification churn and intervention cost at $k=1, 2, 3$. All 6 comparisons maintain statistical significance after Holm-Bonferroni step-down adjustment ($p_{\text{adj}} \le 0.0083 < 0.05$) and Bonferroni adjustment ($p_{\text{adj}} \le 0.0183 < 0.05$).</blockquote>
+<blockquote>2. <strong>Omnibus Planned Family ($N=30$):</strong> Spanning both topologies (Abilene, GEANT), 3 failure severities ($k=1, 2, 3$), and 5 evaluation metrics (switches modified, intervention cost, recovery time, residual risk, success rate). Within this omnibus family, 6 tests have zero paired difference (success rate), which are preserved as non-informative ($p = \text{NaN}$) and explicitly count against the declared multiplicity family size of 30 rather than deflating it to 24. Under strict omnibus Holm adjustment across all $N=30$ prespecified hypotheses, 5 comparisons achieve statistical significance at $\alpha = 0.05$: switch churn and intervention cost at $k=2$ on Abilene ($p_{\text{adj}} = 0.0222$ and $p_{\text{adj}} = 0.0230$), and recovery-time comparisons on GEANT across all three failure levels ($p_{\text{adj}} = 0.000003, 0.002976, 0.000031$, reflecting Dynamic-SP's faster reactive Dijkstra recovery). Metrics such as risk, single-cut and triple-cut Abilene churn/cost ($p_{\text{adj}} \approx 0.052$--$0.067$), and Abilene recovery times do not achieve omnibus significance at $\alpha = 0.05$, and are explicitly reported as non-significant under the omnibus family.</blockquote>
+<hr>
+<h2 class="h-sec">7. Discussion and System Trade-offs</h2>
+<ol>
 <li><strong>Trade-off Between Churn and Path Latency:</strong> CIRAH occasionally accepts a path with $2$ to $3\text{ ms}$ higher propagation latency if that path avoids reconfiguring multiple core switches. In carrier and datacenter environments, this trade-off is highly desirable: saving multiple switch TCAM updates avoids transient packet reordering and flow table lockups.</li>
-<li><strong>Safe Fallbacks Under Network Partitions:</strong> In catastrophic $k=4$ multi-link failures where physical graph partitioning occurs, CIRAH's fallback engine throttles ingress rate by 50% and maintains connectivity on partial paths, whereas unconstrained Dijkstra aborts with unhandled `NoPath` exceptions.</li>
+<li><strong>Safe Fallbacks Under Network Partitions:</strong> In catastrophic $k=4$ multi-link failures where physical graph partitioning occurs, CIRAH's fallback engine throttles ingress rate by 50% and maintains connectivity on partial paths, whereas unconstrained Dijkstra aborts with unhandled <code>NoPath</code> exceptions.</li>
 <li><strong>Recovery Time Overhead and Scaling:</strong> CIRAH's SCM-based diagnosis and combinatorial candidate evaluation introduce measurable decision latency that increases with failure severity. While recovery time at single cut ($k=1$) is on par with reactive shortest path ($49.4\text{ ms}$ vs. $49.2\text{ ms}$), it increases to $178.9\text{ ms}$ at $k=2$, and reaches $415.0\text{ ms}$ under severe triple cuts ($k=3$), compared with $58.8\text{ ms}$ for Dynamic-SP. This reflects the combinatorial depth required to explore loop-free paths and compute Pearl counterfactual outcomes. CIRAH trades off recovery computation time in favor of substantially reduced network reconfiguration churn and lower risk of secondary congestion. For latency-critical sub-100 ms requirements, hardware-accelerated SCM solvers or pre-computed topological subgraphs represent promising future extensions.</li>
 <li><strong>SDN Controller Integration:</strong> CIRAH's lightweight algorithmic profiling execution latency ($<16\text{ ms}$ worst-case isolated solver runtime) demonstrates that the controller logic itself introduces minimal computational overhead, permitting integration as a northbound application on OpenFlow controllers (e.g., Ryu, ONOS) or P4 runtime controllers. However, as established in Section 5.1 and 5.2, total end-to-end recovery time depends on failure severity, combinatorial search depth, and physical switch rule commit latencies, scaling from $49.4\text{ ms}$ at $k=1$ to $178.9\text{ ms}$ at $k=2$ and $415.0\text{ ms}$ at $k=3$ on Abilene (compared with $49.2\text{ ms}$, $60.5\text{ ms}$, and $58.8\text{ ms}$ for Dynamic-SP). The sub-16 ms profiling measurement characterizes single-cycle algorithmic computation and should not be interpreted as proof that all end-to-end network recovery operations complete within 16 ms.</li>
 </ol>
-<hr class='divider'/>
-<h2 class="section-title">8. Threats to Validity and Limitations</h2>
-<ul class="academic-list">
+<hr>
+<h2 class="h-sec">8. Threats to Validity and Limitations</h2>
+<ul>
 <li><strong>Construct Validity:</strong> Intervention cost is modeled using OpenFlow message weights and switch reconfiguration delay proxies ($\Delta t_{\text{commit}} = 12\text{ ms}$). While representative of merchant silicon switches, hardware-specific commit latencies may vary.</li>
 <li><strong>Internal Validity:</strong> Random seed pairing was strictly enforced to guarantee identical network conditions across algorithms.</li>
 <li><strong>External Validity:</strong> Evaluations utilized realistic Abilene and GEANT backbones. While capturing real ISP topologies, datacenter leaf-spine fabrics with extreme multi-pathing require further benchmarking.</li>
@@ -772,18 +711,18 @@ Output: Optimal Intervention Action a*
 <li><strong>Counterfactual Evaluation Scope:</strong> The counterfactual $do(A)$ mechanism changes action selection under tight capacity constraints (80 Mbps links, 40 Mbps cross-traffic) but produces identical outcomes to myopic evaluation under the default wide-capacity conditions (1000 Mbps) used in the ablation campaign. The reported ablation results reflect wide-capacity scenarios; tight-capacity results are documented in the CIHF diagnostic report.</li>
 <li><strong>Risk Constraint Assumptions:</strong> The robust risk bound $R_{\text{robust}} = R_{\text{post}} + z_\alpha \cdot \sigma_R$ uses a heuristic uncertainty estimate $\sigma_R = 0.08 \cdot R_{\text{post}}$ rather than an empirically calibrated variance. The $z_\alpha = 1.645$ quantile provides a 95\% one-sided bound on estimated mean risk, not on individual recovery outcomes. The bound is valid under the assumption that risk estimation errors are approximately Gaussian; violation of this assumption would require recalibration.</li>
 <li><strong>Reproducibility:</strong> All topology definitions, causal equations, simulation runners, and raw result CSV files are fully open-sourced in the project repository.</li>
-</ol>
-<hr class='divider'/>
-<h2 class="section-title">9. Conclusion and Future Scope</h2>
+</ul>
+<hr>
+<h2 class="h-sec">9. Conclusion and Future Scope</h2>
 <p>This paper presented <strong>CIRAH</strong>, a causal-intervention optimization framework for autonomous network self-healing under risk constraints. By formalizing network dynamics as an SCM, computing Pearl's counterfactual interventional outcomes $do(A=a)$, and enforcing robust post-recovery risk limits, CIRAH systematically discovers the minimum-cost recovery action that satisfies post-repair risk constraints. Across approximately 5,300 paired Monte Carlo simulation runs on Abilene, GEANT, and Fat-tree topologies, CIRAH demonstrated a statistically verified reduction in switch churn ($13.8\%$ to $19.7\%$, $p < 0.01$) over reactive shortest-path rerouting while maintaining risk compliance. The 6-way ablation study established that the hard risk constraint is the most impactful component (success drops from 70.0\% to 56.7\% when removed), followed by the intervention cost penalty. The Causal Intervention Healing Field (CIHF) was found to not influence candidate selection under tested conditions; it is retained as an interpretive visualization. Counterfactual evaluation changes action selection under tight capacity constraints but produces identical outcomes under the default wide-capacity scenarios.</p>
 <p><strong>Future Work:</strong> We plan to deploy CIRAH on a distributed hardware testbed with physical P4 programmable switches to evaluate sub-millisecond line-rate counterfactual inference.</p>
-<hr class='divider'/>
-<h2 class="section-title">Conflict of Interest Statement</h2>
+<hr>
+<h2 class="h-sec">Conflict of Interest Statement</h2>
 <p>The authors declare that they have no known competing financial interests or personal relationships that could have appeared to influence the work reported in this paper.</p>
-<h2 class="section-title">Data Availability Statement</h2>
+<h2 class="h-sec">Data Availability Statement</h2>
 <p>The complete source code, topology graphs, Monte Carlo experiment runners, raw CSV datasets, and figure generation scripts are openly available in the public repository at https://github.com/Shabreen123/CIRAH.</p>
-<hr class='divider'/>
-<h2 class="section-title">References</h2>
+<hr>
+<h2 class="h-sec">References</h2>
 <p>[1] M. Sanz Rodrigo, D. Rivera Pinto, J. I. Moreno Novella, A. B. Mozo Velasco, L. de la Cal Garcia, and A. Karamchandani Batra, "Network Digital Twin-Generated Dataset for Machine Learning-based Intelligent Zero-Touch SLA Preservation," <em>Zenodo</em>, Oct. 2025. https://doi.org/10.5281/zenodo.17255327.</p>
 <p>[2] N. Moustafa and J. Slay, "UNSW-NB15: A Comprehensive Data Set for Network Intrusion Detection Systems," in <em>Proc. IEEE MilCIS</em>, 2015, pp. 1-6. https://doi.org/10.1109/MilCIS.2015.7348942.</p>
 <p>[3] H. Qin, J. Chen, X. Qiu, X. Zhang, and M. Cui, "FAPR: An Adaptive Approach to Link Failure Recovery in SDN with High Speed and Low Interruption Rate," <em>Applied Sciences</em>, vol. 14, no. 11, p. 4719, 2024. https://doi.org/10.3390/app14114719.</p>
